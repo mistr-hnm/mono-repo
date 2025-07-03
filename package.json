@@ -2,7 +2,12 @@
   "name": "@mono-repo/source",
   "version": "0.0.0",
   "license": "MIT",
-  "scripts": {},
+  "scripts": {
+    "dev" : "nx run-many --target=start:dev",
+    "dev:start" : "nx run-many --target=start:dev --output-style=stream",
+    "cleanAll" : "nx reset && nx run-many --target=clean --output-style=stram && rm -rf node_nodules && rm -rf apps/*/node_nodules"
+    
+  },
   "private": true,
   "dependencies": {},
   "devDependencies": {
