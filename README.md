@@ -1,5 +1,6 @@
-# MonoRepo 
+# 📦 MonoRepo Structure
 
+```plaintext
 my-monorepo/
 ├── apps/                      # App-level entry points (e.g., frontend, backend)
 │   ├── myschool-fe/           # React / Vue frontend
@@ -14,7 +15,7 @@ my-monorepo/
 ├── .github/                   # GitHub workflows (CI/CD)
 ├── node_modules/              # Managed by pnpm
 ├── package.json               # Root scripts and dependencies
-├── pnpm-workspace.yaml        # pnpm workspace config
-├── nx.json                    # (optional)
-├── tsconfig.base.json         # Shared TS config
-└── README.md
+├── pnpm-workspace.yaml        # pnpm workspace configuration
+├── nx.json                    # (optional) Nx configuration for advanced task orchestration
+├── tsconfig.base.json         # Base TypeScript configuration shared across workspaces
+└── README.md                  # Project documentation
