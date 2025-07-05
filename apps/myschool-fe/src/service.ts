@@ -1,7 +1,7 @@
 
 import axios from 'axios';
 
-const url = "http://localhost:3000";
+const url = `${import.meta.env.VITE_BE_BASE_URL}/api`;
 
 export const getCourses = async() =>{
    return await axios.get(`${url}/courses`);

@@ -19,3 +19,15 @@ my-monorepo/
 ├── nx.json                    # (optional) Nx configuration for advanced task orchestration
 ├── tsconfig.base.json         # Base TypeScript configuration shared across workspaces
 └── README.md                  # Project documentation
+
+
+## TODO
+
+pnpm i                       #(pnpm should be install by "npm i -g pnpm@latest") 
+
+pnpm run dev                                           #(if nx installed)
+pnpx nx run-many -t start:dev                          #(if nx not-installed)
+
+
+
+pnpm add @nestjs/config --filter ./apps/myschool-be/   #(install package in workspace)

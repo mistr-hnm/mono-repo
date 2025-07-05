@@ -3,10 +3,9 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "dev" : "nx run-many --target=start:dev",
-    "dev:start" : "nx run-many --target=start:dev --output-style=stream",
-    "cleanAll" : "nx reset && nx run-many --target=clean --output-style=stram && rm -rf node_nodules && rm -rf apps/*/node_nodules"
-    
+    "dev" : "nx run-many -t start:dev",
+    "dev:start" : "pnpx nx run-many -t start:dev",
+    "cleanAll" : "nx reset && nx run-many -t clean && rm -rf node_modules && rm -rf apps/*/node_modules"
   },
   "private": true,
   "dependencies": {},

@@ -72,13 +72,13 @@ export function StudentTable() {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      enrollmentNumber: 0,
-      fullname: "",
-      dateofbirth: new Date(),
-      enrollmentCourse: "",
-      description: "",
-    }
+    // defaultValues: {
+    //   enrollmentNumber: 0,
+    //   fullname: "",
+    //   dateofbirth: new Date(),
+    //   enrollmentCourse: "",
+    //   description: "",
+    // }
   });
 
   useEffect(() => {
@@ -245,12 +245,12 @@ export function StudentTable() {
       const model = { ...form.getValues() }    
       console.log("model",model);
       model["dateofbirth"] = new Date(model.dateofbirth) 
-      const result = formSchema.safeParse({ ...model })
-      if (!result.success) {
-        console.log("validation failed");
+      const result = formSchema.safeParse({ ...model }) 
+      if (!result.success) { 
+        alert("Validation failed");
         return
       }
-      
+       
       const payLoad = result.data; 
       if (payLoad?._id) {
         updateStudent(payLoad._id, payLoad).then((data) => {
