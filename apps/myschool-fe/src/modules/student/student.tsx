@@ -308,7 +308,7 @@ export function StudentTable() {
                 form.reset();
               }
               }>
-              New
+              Insert
             </Button>
           </AlertDialogTrigger>
         </div>
