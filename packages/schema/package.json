@@ -1,0 +1,31 @@
+{
+  "name": "@myschool/schema",
+  "version": "1.0.0",
+  "main": "index.js",
+  "private" : true,
+  "scripts": {
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [],
+  "author": "My school",
+  "license": "ISC",
+  "exports": {
+    "./api": {
+      "import": "./src/api/index.ts"
+    },
+    "./api/*": {
+      "import": "./src/api/*.ts"
+    }
+  },
+  "description": "My school zod schema",
+  "dependencies": {
+    "zod": "^3.25.67"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "^4.16.2",
+    "eslint": "^9.30.1",
+    "typescript": "^5.8.3"
+  }
+}

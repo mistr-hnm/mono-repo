@@ -124,7 +124,7 @@ export function StudentTable() {
       header: "Enrollment Number",
       cell: ({ row }) => (
         <>
-          <div className="capitalize ">{row.getValue("enrollmentNumber")}</div>
+          <div className="capitalize text-center">{row.getValue("enrollmentNumber")}</div>
         </>
       ),
     },
@@ -140,7 +140,7 @@ export function StudentTable() {
           </Button>
         )
       },
-      cell: ({ row }) => <div >{row.getValue("fullname")}</div>
+      cell: ({ row }) => <div className="text-center" >{row.getValue("fullname")}</div>
     },
     {
       accessorKey: "enrollmentCourse",
@@ -156,7 +156,7 @@ export function StudentTable() {
       },
       cell: ({ row }) => {
         const enrollmentCourse: any = row.getValue("enrollmentCourse")
-        return <div>{enrollmentCourse?.name}</div>
+        return <div className="text-center">{enrollmentCourse?.name}</div>
       }
     },
     {
@@ -174,7 +174,7 @@ export function StudentTable() {
       cell: ({ row }) => {
         const date = new Date(row.getValue("dateofbirth"))
         const formattedDate = `${date.toLocaleString('default', { month: 'long' })} ${date.getDate()}, ${date.getFullYear()}`
-        return <div className="font-medium">{formattedDate}</div>
+        return <div className="text-center font-medium">{formattedDate}</div>
       },
     },
     {
@@ -300,7 +300,7 @@ export function StudentTable() {
   return (
     <div className="w-full">
       <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <div className="flex justify-end mb-2">
+        <div className="flex justify-end my-2">
           <AlertDialogTrigger asChild className="">
             <Button variant="outline" onClick={() => 
               {

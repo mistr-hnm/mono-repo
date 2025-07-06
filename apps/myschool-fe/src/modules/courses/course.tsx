@@ -39,7 +39,7 @@ import { createCouses, deleteCouses, getCourse, getCourses, updateCouses } from 
 import * as z from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 
-export function DataTableDemo() {
+export function Courses() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false); 
@@ -81,7 +81,7 @@ export function DataTableDemo() {
       accessorKey: "courseId",
       header: "Course Id",    
       cell: ({ row }) => (
-        <div className="capitalize ">{row.getValue("courseId")}</div>
+        <div className="capitalize text-center">{row.getValue("courseId")}</div>
       ),
     },
     {
@@ -96,7 +96,7 @@ export function DataTableDemo() {
           </Button>
         )
       },
-      cell: ({ row }) => <div >{row.getValue("name")}</div>
+      cell: ({ row }) => <div className="text-center" >{row.getValue("name")}</div>
     },
     {
       accessorKey: "createdAt",
@@ -186,8 +186,8 @@ export function DataTableDemo() {
     form.setValue('name',name);
     form.setValue('courseId', courseId);
     form.setValue('_id', _id);
-    
   }
+  
   const onDelete = async(raw : Course)=> {    
     setIsLoading(true); // Set loading state to true
     try {
@@ -207,11 +207,14 @@ export function DataTableDemo() {
 
   return ( 
     
-    <div className="w-full">
+    <div className="w-full ">
+      
+
+      
       <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}> 
-        <div className="flex justify-end mb-2">
+        <div className="flex justify-end my-2">
           <AlertDialogTrigger asChild className="">
-          <Button variant="outline" onClick={() => setIsDialogOpen(true)}>
+            <Button variant="outline" onClick={() => setIsDialogOpen(true)}>
               New
             </Button>
           </AlertDialogTrigger>
@@ -351,6 +354,7 @@ export function DataTableDemo() {
           </Button>
         </div>
       </div>
+   
     </div>
   )
 }
