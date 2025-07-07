@@ -30,7 +30,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 
 import { useForm } from "react-hook-form"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
@@ -38,12 +38,12 @@ import { Input } from "@/components/ui/input"
 import { createCouses, deleteCouses, getCourse, getCourses, updateCouses } from "@/utils/service"
 import * as z from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useQueryClient, useMutation, useQuery } from "@tanstack/react-query"
 
 export function Courses() {
 
   const [isLoading, setIsLoading] = useState(false);
-  const [isDialogOpen, setIsDialogOpen] = useState(false); 
-  const [coursesData, setCoursesData] = useState([]); 
+  const [isDialogOpen, setIsDialogOpen] = useState(false);  
   
      
   const [sorting, setSorting] = useState<SortingState>([])
@@ -65,17 +65,13 @@ export function Courses() {
     }
   });
 
-  useEffect(()=> {
-    getcourses()
-  },[]);
+  const queryClient = useQueryClient()
 
-  const getcourses = ()=> {
-    getCourses().then((data)=> {
-      const courses = data.data;
-      setCoursesData(courses);
-    });
-  }
-
+  const { isPending, error, data } = useQuery({
+    queryKey : ["courses"],
+    queryFn : () =>  getCourses().then((response)=> response.data)
+  })
+  
   const columns: ColumnDef<Course>[] = [
     {
       accessorKey: "courseId",
@@ -130,7 +126,7 @@ export function Courses() {
   ]
 
   const table = useReactTable({
-    data : coursesData,
+    data : data,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -148,28 +144,41 @@ export function Courses() {
     },
   })
 
+  const createMutation = useMutation({
+    mutationFn : (body: any) => createCouses(body).then((response) => response.data),
+    onSuccess :() => {
+      queryClient.invalidateQueries({ queryKey : ["courses"]})
+    }
+  })
+  const updateMutation = useMutation({
+    mutationFn : async ({id , data} : {id: string, data : any}) => {
+      return (await updateCouses(id, data)).data
+    },
+    onSuccess :() => {
+      queryClient.invalidateQueries({ queryKey : ["courses"]})
+    }
+  })
+  const deleteMutation = useMutation({
+    mutationFn : ({id} : {id: string}) => deleteCouses(id).then((response) => response.data),
+    onSuccess :() => {
+      queryClient.invalidateQueries({ queryKey : ["courses"]})
+    }
+  })
   
   const onSubmit = async()=> {
-    setIsLoading(true); // Set loading state to true
+    
     try {
       const result = formSchema.safeParse({ ...form.getValues()});
-      console.log("result==>",result);
+      
       if(!result.success){
         console.log("validation failed");
         return
       }
       const payLoad = result.data;
-      
       if(payLoad?._id){
-        updateCouses(payLoad._id,payLoad).then((data)=>{
-          console.log("data",data);
-          getcourses();
-        });
+        updateMutation.mutate({ id :payLoad._id, data : payLoad});
       }else{
-        createCouses(payLoad).then((data)=>{
-          console.log("data",data);
-          getcourses();
-        });
+        createMutation.mutate(payLoad);
       }
     } catch (error) {
       console.error("Error submitting form:", error);
@@ -189,28 +198,16 @@ export function Courses() {
   }
   
   const onDelete = async(raw : Course)=> {    
-    setIsLoading(true); // Set loading state to true
-    try {
-      deleteCouses(raw._id).then((data)=>{
-        console.log("data",data);
-        getcourses();
-      });
-    } catch (error) {
-      console.error("Error submitting form:", error);
-    } finally {
-      setIsLoading(false); // Reset loading state
+      deleteMutation.mutate({ id: raw._id })
       setIsDialogOpen(false)
-    }
   }
   
-  
+  if (isPending) return 'Loading...'
 
   return ( 
-    
-    <div className="w-full ">
-      
-
-      
+     
+    <div className="w-full">
+       
       <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}> 
         <div className="flex justify-end my-2">
           <AlertDialogTrigger asChild className="">
