@@ -2,7 +2,7 @@ import { Body, Controller, Delete, Get, Param, Post, Put, Req } from '@nestjs/co
 import { CoursesService } from './courses.service';
 import { Course } from './schemas/course.schema';
 
-@Controller('courses')
+@Controller()
 export class CoursesController {
  constructor(
     private readonly courseService : CoursesService

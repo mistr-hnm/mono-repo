@@ -1,6 +1,6 @@
 import { axiosInstance } from './instance';
 
-const url = `${import.meta.env.VITE_BE_BASE_URL}/api`;
+const url = `${import.meta.env.VITE_BE_BASE_URL}`;
 
 export const getCourses = async() =>{
    return await axiosInstance.get(`${url}/courses`);

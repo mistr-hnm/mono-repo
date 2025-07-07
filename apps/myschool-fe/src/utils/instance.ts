@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const url = `${import.meta.env.VITE_BE_BASE_URL}/api`;
+const url = `${import.meta.env.VITE_BE_BASE_URL}`;
 const apiKey = `${import.meta.env.VITE_API_KEY}`;
 
 export const axiosInstance = axios.create({
