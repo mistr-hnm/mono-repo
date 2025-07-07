@@ -1,7 +1,8 @@
 
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
-import { Course } from 'src/courses/schemas/course.schema';
+import { Course } from 'src/modules/courses/schemas/course.schema';
+
 
 const StudentStatus    = { ACTIVE : "ACTIVE", SUSPENDED : "SUSPENDED" };
 type StudentStatusType = keyof typeof StudentStatus;
