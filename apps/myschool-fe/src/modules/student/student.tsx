@@ -35,7 +35,7 @@ import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { getStudents, createStudent, deleteStudent, updateStudent, getCourses } from "@/service"
+import { getStudents, createStudent, deleteStudent, updateStudent, getCourses } from "@/utils/service"
 
 import * as z from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"

@@ -33,6 +33,10 @@ export function Login() {
 
   const loginForm = useForm<any>({
     resolver: zodResolver(loginUserBodySchema),
+    defaultValues : {
+      email    : "",
+      password : "",
+    }
   });
 
 
