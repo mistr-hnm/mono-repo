@@ -20,22 +20,34 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useLoginUser } from "@/services/mutation/auth";
+import LoadingSpinner from "@/components/ui/loading-spinner";
 
 export function Login() {
 
   const navigate = useNavigate();
 
+  const useLoginUserMutation = useLoginUser();
+
   const onSubmit = () => {
-    console.log("onSubmit");
-    localStorage.setItem("auth", "userid");
-    navigate({ to: '/' });
+    const input = { ...loginForm.getValues()};
+      
+    useLoginUserMutation.mutate(input, {
+      onError: (error) => {
+        console.log("error", error);
+      },
+      onSuccess: (response) => {
+        localStorage.setItem("auth",JSON.stringify(response));
+        navigate({ to: '/' });
+      }
+    })
   }
 
   const loginForm = useForm<any>({
     resolver: zodResolver(loginUserBodySchema),
-    defaultValues : {
-      email    : "",
-      password : "",
+    defaultValues: {
+      email: "",
+      password: "",
     }
   });
 
@@ -45,7 +57,7 @@ export function Login() {
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>Login</CardTitle>
-          <CardDescription>Login to your Passman account</CardDescription>
+          <CardDescription>Login to your account</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...loginForm}>
@@ -87,10 +99,9 @@ export function Login() {
                 <Button
                   type="submit"
                   className="w-18"
-                // disabled={mutateLoginUser.isPending}
+                  disabled={useLoginUserMutation.isPending}
                 >
-                  {/* {mutateLoginUser.isPending ? <LoadingSpinner /> : "Login"} */}
-                  Login
+                  {useLoginUserMutation.isPending ? <LoadingSpinner /> : "Login"}
                 </Button>
                 <Link to="/" className="text-blue-600">
                   Forgot password
@@ -100,7 +111,7 @@ export function Login() {
           </Form>
         </CardContent>
         <CardFooter>
-          <Link to="/" className="text-blue-600">
+          <Link to="/signup" className="text-blue-600">
             Create a new account
           </Link>
         </CardFooter>

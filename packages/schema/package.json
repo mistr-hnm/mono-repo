@@ -12,9 +12,6 @@
   "author": "My school",
   "license": "ISC",
   "exports": {
-    "./api": {
-      "import": "./src/api/index.ts"
-    },
     "./api/*": {
       "import": "./src/api/*.ts"
     }

@@ -9,6 +9,9 @@ import { RouterModule } from '@nestjs/core';
 import { routes } from './routes';
 import { LoggerMiddleware } from './core/middleware/logger.middleware';
 import { AuthenticationMiddleware } from './core/middleware/authentication.middleware';
+import { UserModule } from './modules/users/user.module';
+import { JwtModule } from '@nestjs/jwt';
+import { env } from './lib/env';
 
 @Module({
   imports: [
@@ -24,8 +27,14 @@ import { AuthenticationMiddleware } from './core/middleware/authentication.middl
       },
       inject: [ConfigService]
     }),
+    JwtModule.register({
+      global: true,
+      secret: env.SECRET,
+      signOptions: { expiresIn: '1h' },
+    }),
     CoursesModule,
-    StudentsModule
+    StudentsModule,
+    UserModule
   ],
   controllers: [AppController],
   providers: [AppService],
@@ -33,6 +42,6 @@ import { AuthenticationMiddleware } from './core/middleware/authentication.middl
 
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(LoggerMiddleware,AuthenticationMiddleware).forRoutes("*")
+    consumer.apply(LoggerMiddleware, AuthenticationMiddleware).forRoutes("*")
   }
 }

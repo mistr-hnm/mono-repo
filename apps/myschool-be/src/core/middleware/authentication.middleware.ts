@@ -12,6 +12,7 @@ export class AuthenticationMiddleware implements NestMiddleware {
                 code: "INVALID_REQUEST"
             });
         }
+        // console.log("authorization",req.headers['authorization']);
         next();
     }
 }
