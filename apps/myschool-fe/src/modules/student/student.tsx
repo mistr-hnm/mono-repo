@@ -30,12 +30,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 
 import { useForm } from "react-hook-form"
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { getStudents, createStudent, deleteStudent, updateStudent, getCourses } from "@/utils/service"
+import { Input } from "@/components/ui/input" 
 
 import * as z from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -46,19 +45,28 @@ import { CalendarIcon } from "lucide-react"
 import { format } from "date-fns"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { useGetStudents } from "@/services/quaries/student"
+import { useGetCourses } from "@/services/quaries/course"
+import { useCreateMutation, useDeleteMutation, useUpdateMutation } from "@/services/mutation/student"
 
 export function StudentTable() {
-
-  const [isLoading, setIsLoading] = useState(false);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [studentData, setStudentData] = useState([]);
-  const [courseData, setCourseData] = useState([]);
+ 
+  const [isDialogOpen, setIsDialogOpen] = useState(false); 
 
 
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = useState({})
+
+
+  const { data : studentData } = useGetStudents();
+  const { data : courseData } = useGetCourses();
+
+  const createMutation = useCreateMutation();
+  const updateMutation = useUpdateMutation();
+  const deleteMutation = useDeleteMutation();
+
 
   const formSchema = z.object({
     _id: z.string().optional(),
@@ -72,36 +80,16 @@ export function StudentTable() {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    // defaultValues: {
-    //   enrollmentNumber: 0,
-    //   fullname: "",
-    //   dateofbirth: new Date(),
-    //   enrollmentCourse: "",
-    //   description: "",
-    // }
+    defaultValues: {
+      enrollmentNumber: 0,
+      fullname: "",
+      dateofbirth: new Date(),
+      enrollmentCourse: "",
+      description: "",
+    }
   });
 
-  useEffect(() => {
-    getCoursesList();
-    getStudentsList();
-  }, []);
 
-  const getStudentsList = () => {
-    getStudents().then((data) => {
-      const students = data.data;
-      console.log("students",students);
-      setStudentData(students);
-    });
-  }
-
-
-  const getCoursesList = () => {
-    getCourses().then((data) => {
-      const courses = data.data;
-      setCourseData(courses);
-    });
-  }
-  
 
   const columns: ColumnDef<Student>[] = [
     {
@@ -192,12 +180,12 @@ export function StudentTable() {
       cell: ({ row }) => {
         return (
           <div className="flex justify-end ">
-            <Button variant="outline" disabled={isLoading} onClick={() => {
+            <Button variant="outline" disabled={deleteMutation.isPending} onClick={() => {
               onEdit(row.original);
             }}>
               Edit
             </Button>
-            <Button variant="outline" className="mx-2" disabled={isLoading} onClick={() => {
+            <Button variant="outline" className="mx-2" disabled={deleteMutation.isPending} onClick={() => {
               onDelete(row.original);
             }}>
               Delete
@@ -209,7 +197,7 @@ export function StudentTable() {
   ]
 
   const table = useReactTable({
-    data: studentData,
+    data: studentData || [],
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -240,10 +228,9 @@ export function StudentTable() {
 
 
   const onSubmit = async () => {
-    setIsLoading(true); // Set loading state to true
+    
     try {
-      const model = { ...form.getValues() }    
-      console.log("model",model);
+      const model = { ...form.getValues() }
       model["dateofbirth"] = new Date(model.dateofbirth) 
       const result = formSchema.safeParse({ ...model }) 
       if (!result.success) { 
@@ -253,20 +240,13 @@ export function StudentTable() {
        
       const payLoad = result.data; 
       if (payLoad?._id) {
-        updateStudent(payLoad._id, payLoad).then((data) => {
-          console.log("data", data);
-          getStudentsList();
-        });
+        updateMutation.mutate({id : payLoad._id, body : payLoad})
       } else {
-        createStudent(payLoad).then((data) => {
-          console.log("data", data);
-          getStudentsList();
-        });
+        createMutation.mutate(payLoad)
       }
     } catch (error) {
       console.error("Error submitting form:", error);
-    } finally {
-      setIsLoading(false); // Reset loading state
+    } finally { 
       setIsDialogOpen(false)
     }
   }
@@ -281,21 +261,15 @@ export function StudentTable() {
     form.setValue('enrollmentCourse', enrollmentCourse?._id);
   }
 
-  const onDelete = async (raw: Student) => {
-    setIsLoading(true); // Set loading state to true
+  const onDelete = async (raw: Student) => { 
     try {
-      deleteStudent(raw._id).then((data) => {
-        console.log("data", data);
-        getStudentsList();
-      });
+      deleteMutation.mutate({id : raw._id})
     } catch (error) {
       console.error("Error submitting form:", error);
-    } finally {
-      setIsLoading(false); // Reset loading state
+    } finally { 
       setIsDialogOpen(false)
     }
   }
-
 
   return (
     <div className="w-full">
@@ -450,9 +424,9 @@ export function StudentTable() {
                   <Button
                     type="button"
                     onClick={onSubmit}
-                    disabled={isLoading} // Disable button while loading
+                    disabled={createMutation.isPending} // Disable button while loading
                   >
-                    {isLoading ? "Loading..." : "Continue"}
+                    {createMutation.isPending ? "Loading..." : "Continue"}
                   </Button>
 
                 </AlertDialogFooter>

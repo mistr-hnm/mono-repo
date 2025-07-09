@@ -16,16 +16,16 @@ function Home() {
   return (<div>
     <div className='flex justify-between'>
       <div className="p-2 flex gap-2">
-        <Link to="/" className="[&.active]:font-bold">
+        <Link to="/"  className="[&.active]:font-bold">
           Home
         </Link>{' '}
-        <Link to="/about" className="[&.active]:font-bold">
+        <Link to="/about"  className="[&.active]:font-bold">
           About
         </Link>{' '}
-        <Link to="/courses" className="[&.active]:font-bold">
+        <Link to="/courses"  className="[&.active]:font-bold">
           Courses
         </Link>{' '}
-        <Link to="/students" className="[&.active]:font-bold">
+        <Link to="/students"  className="[&.active]:font-bold">
           Student
         </Link>
       </div>

@@ -103,7 +103,7 @@ export function Login() {
                 >
                   {useLoginUserMutation.isPending ? <LoadingSpinner /> : "Login"}
                 </Button>
-                <Link to="/" className="text-blue-600">
+                <Link to="/" from="/login" className="text-blue-600">
                   Forgot password
                 </Link>
               </div>
@@ -111,7 +111,7 @@ export function Login() {
           </Form>
         </CardContent>
         <CardFooter>
-          <Link to="/signup" className="text-blue-600">
+          <Link to="/signup" from="/login" className="text-blue-600">
             Create a new account
           </Link>
         </CardFooter>

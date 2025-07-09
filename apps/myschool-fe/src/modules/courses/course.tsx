@@ -32,13 +32,14 @@ import {
 } from "@/components/ui/table"
 import { useState } from "react"
 
+import * as z from "zod"
 import { useForm } from "react-hook-form"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { createCouses, deleteCouses, getCourse, getCourses, updateCouses } from "@/utils/service"
-import * as z from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useQueryClient, useMutation, useQuery } from "@tanstack/react-query"
+import { useCreateMutation, useDeleteMutation, useUpdateMutation } from "@/services/mutation/course"
+import { useGetCourses } from "@/services/quaries/course"
+ 
 
 export function Courses() {
 
@@ -65,12 +66,13 @@ export function Courses() {
     }
   });
 
-  const queryClient = useQueryClient()
+ 
 
-  const { isPending, error, data } = useQuery({
-    queryKey : ["courses"],
-    queryFn : () =>  getCourses().then((response)=> response.data)
-  })
+  const { isPending, data } = useGetCourses();
+  const createMutation = useCreateMutation();
+  const updateMutation = useUpdateMutation();
+  const deleteMutation = useDeleteMutation();
+  
   
   const columns: ColumnDef<Course>[] = [
     {
@@ -144,27 +146,7 @@ export function Courses() {
     },
   })
 
-  const createMutation = useMutation({
-    mutationFn : (body: any) => createCouses(body).then((response) => response.data),
-    onSuccess :() => {
-      queryClient.invalidateQueries({ queryKey : ["courses"]})
-    }
-  })
-  const updateMutation = useMutation({
-    mutationFn : async ({id , data} : {id: string, data : any}) => {
-      return (await updateCouses(id, data)).data
-    },
-    onSuccess :() => {
-      queryClient.invalidateQueries({ queryKey : ["courses"]})
-    }
-  })
-  const deleteMutation = useMutation({
-    mutationFn : ({id} : {id: string}) => deleteCouses(id).then((response) => response.data),
-    onSuccess :() => {
-      queryClient.invalidateQueries({ queryKey : ["courses"]})
-    }
-  })
-  
+     
   const onSubmit = async()=> {
     
     try {
@@ -176,7 +158,7 @@ export function Courses() {
       }
       const payLoad = result.data;
       if(payLoad?._id){
-        updateMutation.mutate({ id :payLoad._id, data : payLoad});
+        updateMutation.mutate({ id :payLoad._id, body : payLoad});
       }else{
         createMutation.mutate(payLoad);
       }
@@ -189,9 +171,8 @@ export function Courses() {
   }
 
   const onEdit = async(raw : Course)=> {
-    setIsDialogOpen(true)
-    const course = await getCourse(raw._id)
-    const { courseId, name, _id } = course.data as Course
+    setIsDialogOpen(true);
+    const { courseId, name, _id } = raw;
     form.setValue('name',name);
     form.setValue('courseId', courseId);
     form.setValue('_id', _id);
