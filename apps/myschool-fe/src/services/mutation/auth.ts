@@ -1,4 +1,4 @@
-import { axiosInstance } from "@/utils/instance";
+import { axiosInstance } from "@/utils/interceptor";
 import { useMutation } from "@tanstack/react-query";
 import type { LoginUserBody } from "@myschool/schema/api/auth";
 
@@ -8,7 +8,9 @@ export function useLoginUser() {
   return useMutation({
     mutationFn : async (body : LoginUserBody) => {
         const response = await axiosInstance.post(`${url}/users/login`, body)
-        return response.data;
+        
+        if(response.status !== 200 ) throw await response.data; 
+        return response.data.data;
      }
   })
 }

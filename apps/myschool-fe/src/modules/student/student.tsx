@@ -45,8 +45,8 @@ import { CalendarIcon } from "lucide-react"
 import { format } from "date-fns"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { useGetStudents } from "@/services/quaries/student"
-import { useGetCourses } from "@/services/quaries/course"
+import { useGetStudents } from "@/services/queries/student"
+import { useGetCourses } from "@/services/queries/course"
 import { useCreateMutation, useDeleteMutation, useUpdateMutation } from "@/services/mutation/student"
 
 export function StudentTable() {

@@ -1,6 +1,7 @@
 import { Injectable, NestMiddleware } from "@nestjs/common"
 import { JwtService } from "@nestjs/jwt"
 import { Request, Response, NextFunction } from 'express'
+import { UnauthorizedException } from "src/lib/response-exceptions";
 
 @Injectable()
 export class AuthenticationMiddleware implements NestMiddleware {
@@ -10,12 +11,9 @@ export class AuthenticationMiddleware implements NestMiddleware {
     ){}
 
 
-    use(req: Request, res: Response, next: NextFunction) {
+   async use(req: Request, res: Response, next: NextFunction) {
         if (!req.headers['myschool-signature'] || req.headers['myschool-signature'] != process.env.API_KEY) {
-            return res.status(400).send({
-                message: "Invalid Secret Key.",
-                code: "INVALID_REQUEST"
-            });
+            throw new UnauthorizedException();
         }
         const { ip, method, originalUrl } = req;
 
@@ -29,21 +27,16 @@ export class AuthenticationMiddleware implements NestMiddleware {
             const authHeader = req.headers['authorization']
 
             if (!authHeader  || !authHeader.toLowerCase().startsWith('bearer ')) {
-                    return res.status(400).send({
-                        message: "Missing or invalid Authorization header",
-                        code: "UNAUTHORIZED"
-                    });
+                throw new UnauthorizedException();
             }
             const token = authHeader.split(' ')[1]
             try{
-                const decoded = this.jwtService.verify(token)
+                const decoded = await this.jwtService.verifyAsync(token)
+                
                 req['user'] = decoded.sub;
                 next()
-            }catch(err){
-                return res.status(400).send({
-                    message: "Invalid or expired token",
-                    code: "UNAUTHORIZED"
-                });
+            }catch(err){ 
+                throw new UnauthorizedException(err?.message);
             }
         }
     }

@@ -38,7 +38,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useCreateMutation, useDeleteMutation, useUpdateMutation } from "@/services/mutation/course"
-import { useGetCourses } from "@/services/quaries/course"
+import { useGetCourses } from "@/services/queries/course"
  
 
 export function Courses() {

@@ -36,8 +36,8 @@ export function Login() {
       onError: (error) => {
         console.log("error", error);
       },
-      onSuccess: (response) => {
-        localStorage.setItem("auth",JSON.stringify(response));
+      onSuccess: (response) => { 
+        localStorage.setItem("auth",JSON.stringify(response.data));
         navigate({ to: '/' });
       }
     })

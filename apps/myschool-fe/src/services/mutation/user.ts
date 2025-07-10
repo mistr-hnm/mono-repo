@@ -1,4 +1,4 @@
-import { axiosInstance } from "@/utils/instance";
+import { axiosInstance } from "@/utils/interceptor";
 import type { UserBody } from "@myschool/schema/api/user";
 import { useMutation } from "@tanstack/react-query";
 

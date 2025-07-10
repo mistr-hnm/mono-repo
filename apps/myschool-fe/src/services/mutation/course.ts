@@ -1,4 +1,4 @@
-import { axiosInstance } from "@/utils/instance";
+import { axiosInstance } from "@/utils/interceptor";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 const url = `${import.meta.env.VITE_BE_BASE_URL}`;
 
@@ -9,7 +9,9 @@ export function useCreateMutation() {
   return useMutation({
     mutationFn : async (body :  any) => {
         const response = await axiosInstance.post(`${url}/courses`, body)
-        return response.data;
+        
+        if(response.status !== 200 ) throw await response.data; 
+        return response.data.data;
      },
      onSuccess :() => {
       queryClient.invalidateQueries({ queryKey : ["courses"]})
@@ -23,7 +25,9 @@ export function useUpdateMutation() {
   return useMutation({
     mutationFn : async ({id , body} : {id: string, body : any}) => {
         const response = await axiosInstance.put(`${url}/courses/${id}`, body);
-        return response.data;
+        
+        if(response.status !== 200 ) throw await response.data; 
+        return response.data.data;
      },
      onSuccess :() => {
       queryClient.invalidateQueries({ queryKey : ["courses"]})
@@ -38,7 +42,9 @@ export function useDeleteMutation() {
   return useMutation({
     mutationFn : async ({id} : { id: string }) => {
         const response = await axiosInstance.delete(`${url}/courses/${id}`);
-        return response.data;
+        
+        if(response.status !== 200 ) throw await response.data; 
+        return response.data.data;
      },
      onSuccess :() => {
       queryClient.invalidateQueries({ queryKey : ["courses"]})

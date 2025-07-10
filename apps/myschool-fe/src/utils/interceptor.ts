@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const url    = `${import.meta.env.VITE_BE_BASE_URL}`
+const url = `${import.meta.env.VITE_BE_BASE_URL}`
 const apiKey = `${import.meta.env.VITE_API_KEY}`
 
 export const axiosInstance = axios.create({
@@ -19,5 +19,17 @@ axiosInstance.interceptors.request.use(
     },
     (error) => {
         Promise.reject(error)
+    }
+)
+
+axiosInstance.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        console.log("error", error);
+        if (error?.response?.status == 401) {
+            localStorage.removeItem("auth");
+            // window.location.href = "/login";
+        }
+        return Promise.reject(error);
     }
 )
