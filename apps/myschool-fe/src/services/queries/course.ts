@@ -8,8 +8,7 @@ export function useGetCourses() {
         queryKey : ["courses"],
         queryFn : async () => {
            const response = await axiosInstance.get(`${url}/courses`)
-           console.log("response",response);      
-           
+      
            if(response.status !== 200 ) throw await response.data; 
            return response.data.data;
         }

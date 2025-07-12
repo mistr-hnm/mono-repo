@@ -5,6 +5,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import './index.css'
  
 import { routeTree } from './routeTree.gen'
+import { Toaster } from 'sonner'
+
 
 const router = createRouter({ routeTree }) // @todo : add more options
 const queryClient = new QueryClient()
@@ -26,6 +28,7 @@ if (!rootElement.innerHTML) {
     <StrictMode>
        <QueryClientProvider client={queryClient}>
           <App/>
+          <Toaster />
       </QueryClientProvider>
     </StrictMode>,
   )

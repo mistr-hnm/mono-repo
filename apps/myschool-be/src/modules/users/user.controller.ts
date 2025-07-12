@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Req } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, Req } from '@nestjs/common';
 import { UserService } from './user.service';
 import type { LoginUserBody } from "@myschool/schema/src/api";
 import { User } from './schemas/user.schema';
@@ -15,6 +15,7 @@ export class UserController {
   }
 
   @Post("/login")
+  @HttpCode(200)
   async login(@Body() user: LoginUserBody) {
     return await this.userService.login(user);  // @todo : move this to auth service
   }

@@ -8,9 +8,9 @@ export function useLoginUser() {
   return useMutation({
     mutationFn : async (body : LoginUserBody) => {
         const response = await axiosInstance.post(`${url}/users/login`, body)
-        
+                
         if(response.status !== 200 ) throw await response.data; 
-        return response.data.data;
+        return response.data;
      }
   })
 }

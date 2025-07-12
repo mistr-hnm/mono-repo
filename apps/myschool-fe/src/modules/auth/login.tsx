@@ -22,23 +22,26 @@ import {
 import { Input } from "@/components/ui/input";
 import { useLoginUser } from "@/services/mutation/auth";
 import LoadingSpinner from "@/components/ui/loading-spinner";
+import { toast } from "sonner";
 
 export function Login() {
 
-  const navigate = useNavigate();
+  const navigate = useNavigate()
 
-  const useLoginUserMutation = useLoginUser();
-
+  const useLoginUserMutation = useLoginUser()
+  
   const onSubmit = () => {
-    const input = { ...loginForm.getValues()};
-      
+    const input = { ...loginForm.getValues()}
+        
     useLoginUserMutation.mutate(input, {
-      onError: (error) => {
-        console.log("error", error);
+      onSuccess: (response) => {
+        toast("Logged in successfully.")
+        localStorage.setItem("auth",JSON.stringify(response.data))
+        navigate({ to: '/' })
       },
-      onSuccess: (response) => { 
-        localStorage.setItem("auth",JSON.stringify(response.data));
-        navigate({ to: '/' });
+      onError: (error  :any) => {
+        const msg = error?.response?.data?.message || "Something went wrong"
+        toast(msg)
       }
     })
   }
