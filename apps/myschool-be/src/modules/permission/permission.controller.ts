@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Req } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
 import { PermissionService } from './permission.service';
 import { Permission } from './schemas/permission.schema';
 
@@ -10,8 +10,8 @@ export class PermissionController {
 
 
     @Post()
-    create(@Body() course: Permission) {
-        return this.permissionService.create(course);
+    create(@Body() permission: Permission) {
+        return this.permissionService.create(permission);
     }
 
     @Get()
@@ -25,8 +25,8 @@ export class PermissionController {
     }
 
     @Put(':id')
-    update(@Param('id') id: string, @Body() course: Partial<Permission>) {
-        return this.permissionService.update(id, course);
+    update(@Param('id') id: string, @Body() permission: Partial<Permission>) {
+        return this.permissionService.update(id, permission);
     }
 
     @Delete(':id')

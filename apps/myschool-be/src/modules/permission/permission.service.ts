@@ -11,27 +11,27 @@ export class PermissionService {
         @InjectModel(Permission.name) private permssionModel: Model<PermissionDocument>
     ) { }
 
-    create(course: Permission): Promise<Permission> {
-        const newPermission = new this.permssionModel(course);
+    create(permission: Permission): Promise<Permission> {
+        const newPermission = new this.permssionModel(permission);
         return newPermission.save();
     }
 
    async findAll(): Promise<any> {
         try {
-            const courses = await this.permssionModel.find().exec();
-            return { success: true, data: courses };
+            const permissions = await this.permssionModel.find().exec();
+            return { success: true, data: permissions };
         } catch (err) {
             throw new BadRequestException();
         }
     }
 
     findById(id: string): Promise<Permission | null> {
-        const course = this.permssionModel.findById(id).exec();
-        return course;
+        const permission = this.permssionModel.findById(id).exec();
+        return permission;
     }
 
-    update(id: string, course: Partial<Permission>): Promise<Permission | null> {
-        return this.permssionModel.findByIdAndUpdate(id, course, { new: true }).exec();
+    update(id: string, permission: Partial<Permission>): Promise<Permission | null> {
+        return this.permssionModel.findByIdAndUpdate(id, permission, { new: true }).exec();
     }
 
     delete(id: string): Promise<Permission | null> {

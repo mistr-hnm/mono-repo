@@ -7,6 +7,8 @@ import * as bcrypt from 'bcrypt';
 import { LoginUserBody } from '@myschool/schema/src/api';
 import { JwtService } from '@nestjs/jwt';
 import { BadRequestException, NotFoundException, UnauthorizedException } from 'src/lib/response-exceptions';
+import { PermissionService } from '../permission/permission.service';
+import { CacheService } from '../../shared/cache/cache.service';
 
 
 @Injectable()
@@ -14,11 +16,14 @@ export class UserService {
 
     constructor(
         @InjectModel(User.name) private userModel: Model<UserDocument>,
+
+        private permissionService: PermissionService,
+        private cacheService: CacheService,
         private jwtService: JwtService,
     ) { }
 
     async login(user: LoginUserBody): Promise<any> {
-        try {
+        try {           
             const existUser = await this.userModel.findOne({ email: user.email }).select(["_id","password"]);
             if (!existUser) throw new NotFoundException();
 
@@ -28,9 +33,13 @@ export class UserService {
             const payload = { sub : existUser._id, email : user.email }
             const token = await this.jwtService.signAsync(payload)
             
+            const permission = await this.permissionService.findAll()
+
+            await this.cacheService.addToCache('permission',JSON.stringify(permission.data));
+            
             return {
                 sucess : true,
-                data : { user : existUser._id, email : user.email, token : token }
+                data : { user : existUser._id, email : user.email, token : token , permission : permission.data }
             };
         } catch (e) {
             throw new BadRequestException("User failed to login");

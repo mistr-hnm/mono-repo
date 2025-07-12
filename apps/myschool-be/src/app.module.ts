@@ -13,6 +13,7 @@ import { UserModule } from './modules/users/user.module';
 import { JwtModule } from '@nestjs/jwt';
 import { env } from './lib/env';
 import { PermissionModule } from './modules/permission/permission.module';
+import { SharedCacheModule } from './shared/cache/cache.module';
 
 @Module({
   imports: [
@@ -33,13 +34,17 @@ import { PermissionModule } from './modules/permission/permission.module';
       secret: env.SECRET,
       signOptions: { expiresIn: '1h' },
     }),
+    SharedCacheModule,
     CoursesModule,
     StudentsModule,
     UserModule,
     PermissionModule
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    
+  ],
 })
 
 export class AppModule implements NestModule {
