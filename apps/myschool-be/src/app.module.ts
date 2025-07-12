@@ -12,6 +12,7 @@ import { AuthenticationMiddleware } from './core/middleware/authentication.middl
 import { UserModule } from './modules/users/user.module';
 import { JwtModule } from '@nestjs/jwt';
 import { env } from './lib/env';
+import { PermissionModule } from './modules/permission/permission.module';
 
 @Module({
   imports: [
@@ -34,7 +35,8 @@ import { env } from './lib/env';
     }),
     CoursesModule,
     StudentsModule,
-    UserModule
+    UserModule,
+    PermissionModule
   ],
   controllers: [AppController],
   providers: [AppService],
