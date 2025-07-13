@@ -9,7 +9,7 @@ export function useGetStudents() {
         queryFn : async () => {
            const response = await axiosInstance.get(`${url}/students`)
            
-           if(response.status !== 200 ) throw await response.data; 
+           if(response.status !== 200) throw await response.data; 
            return response.data.data;
         }
     })
