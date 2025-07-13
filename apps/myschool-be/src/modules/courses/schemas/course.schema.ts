@@ -1,35 +1,20 @@
 
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
+import { BaseSchema } from 'src/core/meta/base.schema';
+@Schema()
+export class Course extends BaseSchema {
 
-export type CourseDocument = HydratedDocument<Course>;
-
-@Schema({ timestamps : true})
-export class Course {
-
-    @Prop({required : true})
+    @Prop({ required: true })
     courseId: number;
 
-    @Prop({required : true})
+    @Prop({ required: true })
     name: string;
 
     @Prop()
     description: string;
 
-    createdAt?: Date;
-
-    updatedAt?: Date;
-
 }
 
+export type CourseDocument = HydratedDocument<Course>;
 export const CourseSchema = SchemaFactory.createForClass(Course);
-
-
-
-// Another manual way (with out schema option)
-// export const CatSchema = new mongoose.Schema({
-//     name: String,
-//     age: Number,
-//     breed: String,
-//   });
-  

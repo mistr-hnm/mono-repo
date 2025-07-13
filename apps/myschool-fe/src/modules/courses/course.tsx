@@ -32,7 +32,8 @@ import {
 } from "@/components/ui/table"
 import { useState } from "react"
 
-import * as z from "zod"
+import * as z from 'zod/v4'
+
 import { useForm } from "react-hook-form"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"

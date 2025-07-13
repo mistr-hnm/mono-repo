@@ -42,8 +42,7 @@ import { SharedCacheModule } from './shared/cache/cache.module';
   ],
   controllers: [AppController],
   providers: [
-    AppService,
-    
+    AppService
   ],
 })
 

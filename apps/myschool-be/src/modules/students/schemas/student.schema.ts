@@ -1,14 +1,12 @@
 
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
+import { BaseSchema } from 'src/core/meta/base.schema';
 import { Course } from 'src/modules/courses/schemas/course.schema';
 
 
-const StudentStatus    = { ACTIVE : "ACTIVE", SUSPENDED : "SUSPENDED" };
-type StudentStatusType = keyof typeof StudentStatus;
-
-@Schema({ timestamps : true})
-export class Student {
+@Schema()
+export class Student extends BaseSchema {
 
     @Prop({required : true})
     enrollmentNumber: number;
@@ -27,31 +25,9 @@ export class Student {
 
     @Prop()
     picture: string;
-
-    @Prop({
-        type: String,
-        required: true,
-        default : StudentStatus.ACTIVE,
-        enum: Object.values(StudentStatus),
-    })
-    status: StudentStatusType;
-
-
-    createdAt?: Date;
-
-    updatedAt?: Date;
-
+ 
 }
 
 
 export type  StudentDocument = HydratedDocument<Student>;
 export const StudentSchema   = SchemaFactory.createForClass(Student);
-
-
-// Another manual way (with out schema option)
-// export const CatSchema = new mongoose.Schema({
-//     name: String,
-//     age: Number,
-//     breed: String,
-//   });
-  

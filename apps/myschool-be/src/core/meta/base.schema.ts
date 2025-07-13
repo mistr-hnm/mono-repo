@@ -2,8 +2,7 @@ import { Prop, Schema } from "@nestjs/mongoose";
 
 export enum Status {
     ACTIVE = "active",
-    SUSPENDED = "suspended",
-    UNVERIFIED = "unverified",
+    DELETED = "deleted",
 }
 
 

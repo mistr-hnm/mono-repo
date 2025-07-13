@@ -36,7 +36,8 @@ import { useForm } from "react-hook-form"
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input" 
 
-import * as z from "zod"
+import * as z from 'zod/v4'
+
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"

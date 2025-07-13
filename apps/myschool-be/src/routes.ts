@@ -6,16 +6,16 @@ import { PermissionModule } from "./modules/permission/permission.module";
 
 export const routes : Routes = [
     {
+        path : 'users',
+        module : UserModule
+    },
+    {
         path : 'courses',
         module : CoursesModule
     },
     {
         path : 'students',
         module : StudentsModule
-    },
-    {
-        path : 'users',
-        module : UserModule
     },
     {
         path : 'permissions',
