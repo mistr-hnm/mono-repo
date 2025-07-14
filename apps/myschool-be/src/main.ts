@@ -53,10 +53,11 @@ async function bootstrap() {
     }
   });
   app.use('/docs', apiReference({
-    spec: {
-      content: document
-    }
-  }))
+    content: document,
+    theme: 'none',
+    title: "MySchool",
+    
+  }));
 
 
   app.enableCors("*")
