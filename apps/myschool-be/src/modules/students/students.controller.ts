@@ -1,10 +1,16 @@
 import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
-import { ApiBody, ApiHeaders, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
-import { StudentsService } from './students.service';
-import { Student } from './schemas/student.schema';
-import { signture } from 'src/core/meta/global.header';
-import { createStudentValidator,updateStudentValidator  } from './schemas/student.validator';
-import { createStudentResponseSchema, deleteStudentResponseSchema, getAllStudentsResponseSchema, getStudentResponseSchema, updateStudentResponseSchema } from './schemas/student.response';
+import { ApiBody, ApiHeaders, ApiOperation, ApiParam, ApiOkResponse, ApiBadRequestResponse, ApiUnauthorizedResponse, ApiNotFoundResponse } from '@nestjs/swagger'; // Added specific ApiResponse decorators
+import { StudentsService } from './students.service'; 
+import {
+    CreateStudentDto,
+    CreateStudentResponseDto,
+    UpdateStudentDto,
+    UpdateStudentResponseDto, 
+    GetStudentResponseDto, 
+    GetStudentsResponseDto, 
+    DeleteStudentResponseDto
+} from './schemas/student.dto'; 
+import { signture } from 'src/core/meta/global.header'; 
 
 @Controller()
 export class StudentsController {
@@ -15,57 +21,63 @@ export class StudentsController {
     @ApiOperation({ summary: "Create a new student" })
     @ApiBody({
         description: "Student data for creation.",
-        schema: createStudentValidator
+        type: CreateStudentDto  
     })
     @ApiHeaders([signture])
-    @ApiResponse(createStudentResponseSchema[200])
-    @ApiResponse(createStudentResponseSchema[401])
+    @ApiOkResponse({ description: "Student created successfully", type: CreateStudentResponseDto })
+    @ApiBadRequestResponse({ description: "Invalid input" })
+    @ApiUnauthorizedResponse({ description: "Unauthorized" })
     @Post()
-    create(@Body() student: Student) {
-        return this.studentService.create(student);
+    async create(@Body() createStudentDto: CreateStudentDto) { 
+        return await this.studentService.create(createStudentDto);
     }
 
     @ApiOperation({ summary: "Get all students" })
     @ApiHeaders([signture])
-    @ApiResponse(getAllStudentsResponseSchema[200])
-    @ApiResponse(getAllStudentsResponseSchema[401])
+    @ApiOkResponse({ description: "Students fetched successfully", type: GetStudentsResponseDto })
+    @ApiUnauthorizedResponse({ description: "Unauthorized" })
+    // @ApiQuery({ type: GetAllStudentsDto, required: false }) @todo
     @Get()
-    findAll() {
-        return this.studentService.findAll();
+    async findAll() { 
+        return await this.studentService.findAll();
     }
 
     @ApiOperation({ summary: "Get student by ID" })
-    @ApiParam({ name: 'id', description: "ID of the student to retrieve.", required: true })
+    @ApiParam({ name: 'id', description: "ID of the student to retrieve.", type: String, format: 'uuid' })
     @ApiHeaders([signture])
-    @ApiResponse(getStudentResponseSchema[200])
-    @ApiResponse(getStudentResponseSchema[401])
+    @ApiOkResponse({ description: "Student fetched successfully", type: GetStudentResponseDto }) 
+    @ApiUnauthorizedResponse({ description: "Unauthorized" })
+    @ApiNotFoundResponse({ description: "Student not found." })
     @Get(':id')
-    findById(@Param('id') id: string) {
-        return this.studentService.findById(id);
+    async findById(@Param('id') id: string) {
+        return await this.studentService.findById(id);
     }
 
     @ApiOperation({ summary: "Update student by ID" })
-    @ApiParam({ name: 'id', description: "ID of the student to update.", required: true })
+    @ApiParam({ name: 'id', description: "ID of the student to update.", type: String, format: 'uuid' }) 
     @ApiBody({
         description: "Partial student data for update.",
-        schema: updateStudentValidator
+        type: UpdateStudentDto // Use the DTO type directly
     })
     @ApiHeaders([signture])
-    @ApiResponse(updateStudentResponseSchema[200])
-    @ApiResponse(updateStudentResponseSchema[401])
-    @ApiResponse({ status: 404, description: "Student not found." })
+    @ApiOkResponse({ description: "Student updated successfully", type: UpdateStudentResponseDto }) 
+    @ApiBadRequestResponse({ description: "Invalid input" })
+    @ApiUnauthorizedResponse({ description: "Unauthorized" })
+    @ApiNotFoundResponse({ description: "Student not found." }) 
     @Put(':id')
-    update(@Param('id') id: string, @Body() course: Partial<Student>) {
-        return this.studentService.update(id, course);
+    async update(@Param('id') id: string, @Body() updateStudentDto: UpdateStudentDto) { 
+        return await this.studentService.update(id, updateStudentDto);
     }
 
     @ApiOperation({ summary: "Delete student by ID" })
-    @ApiParam({ name: 'id', description: "ID of the student to delete.", required: true })
+    @ApiParam({ name: 'id', description: "ID of the student to delete.", type: String, format: 'uuid' })
     @ApiHeaders([signture])
-    @ApiResponse(deleteStudentResponseSchema[200])
-    @ApiResponse(deleteStudentResponseSchema[401])
+    @ApiOkResponse({ description: "Student deleted successfully", type: DeleteStudentResponseDto }) 
+    @ApiBadRequestResponse({ description: "Invalid input" })
+    @ApiUnauthorizedResponse({ description: "Unauthorized" })
+    @ApiNotFoundResponse({ description: "Student not found." })
     @Delete(':id')
-    delete(@Param('id') id: string) {
-        return this.studentService.delete(id);
+    async delete(@Param('id') id: string) {
+        return await this.studentService.delete(id);
     }
 }

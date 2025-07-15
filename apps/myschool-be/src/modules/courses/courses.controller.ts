@@ -1,12 +1,19 @@
 import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
-import { ApiBody, ApiHeaders, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
+import { ApiBody, ApiHeaders, ApiOperation, ApiParam, ApiResponse, ApiOkResponse, ApiBadRequestResponse, ApiUnauthorizedResponse } from '@nestjs/swagger'; // Added new decorators
 import { CoursesService } from './courses.service';
-import { Course } from './schemas/course.schema';
+// Import the Course DTOs
+import {
+    CreateCourseDto,
+    CreateCourseResponseDto,
+    UpdateCourseDto,
+    UpdateCourseResponseDto,
+    GetCourseResponseDto,
+    GetCoursesResponseDto,
+    DeleteCourseResponseDto
+} from './schemas/course.dto';
 import { signture } from 'src/core/meta/global.header';
-import { createCourseValidator, updateCourseValidator } from './schemas/course.validator';
-import { createCourseResponseSchema, deleteCourseResponseSchema, getAllCoursesResponseSchema, getCourseResponseSchema, updateCourseResponseSchema } from './schemas/course.response';
 
-@Controller()
+@Controller() 
 export class CoursesController {
     constructor(
         private readonly courseService: CoursesService
@@ -15,57 +22,62 @@ export class CoursesController {
     @ApiOperation({ summary: "Create a new course" })
     @ApiBody({
         description: "Course data for creation.",
-        schema: createCourseValidator
+        type: CreateCourseDto // Use the DTO type directly
     })
     @ApiHeaders([signture])
-    @ApiResponse(createCourseResponseSchema[200])
-    @ApiResponse(createCourseResponseSchema[401])
+    @ApiOkResponse({ description: "Course created successfully", type: CreateCourseResponseDto }) // Use type for DTOs
+    @ApiBadRequestResponse({ description: "Invalid input" })
+    @ApiUnauthorizedResponse({ description: "Unauthorized" })
     @Post()
-    create(@Body() course: Course) {
-        return this.courseService.create(course);
+    async create(@Body() createCourseDto: CreateCourseDto) { // Use the DTO for the body
+        return await this.courseService.create(createCourseDto);
     }
 
     @ApiOperation({ summary: "Get all courses" })
     @ApiHeaders([signture])
-    @ApiResponse(getAllCoursesResponseSchema[200])
-    @ApiResponse(getAllCoursesResponseSchema[401])
+    @ApiOkResponse({ description: "Courses fetched successfully", type: GetCoursesResponseDto }) // Use type for DTOs
+    @ApiUnauthorizedResponse({ description: "Unauthorized" })
+    // You can add @ApiQuery for GetAllCoursesDto if you want to support pagination/filters
+    // @ApiQuery({ type: GetAllCoursesDto, required: false })
     @Get()
-    findAll() {
-        return this.courseService.findAll();
+    async findAll() { // If you plan to add pagination/filters later, consider adding @Query() params
+        return await this.courseService.findAll();
     }
 
     @ApiOperation({ summary: "Get course by ID" })
-    @ApiParam({ name: 'id', description: "ID of the course to retrieve.", required: true })
+    @ApiParam({ name: 'id', description: "ID of the course to retrieve.", type: String, format: 'uuid' }) // Explicitly define type
     @ApiHeaders([signture])
-    @ApiResponse(getCourseResponseSchema[200])
-    @ApiResponse(getCourseResponseSchema[401])
+    @ApiOkResponse({ description: "Course fetched successfully", type: GetCourseResponseDto }) // Use type for DTOs
+    @ApiUnauthorizedResponse({ description: "Unauthorized" })
     @Get(':id')
-    findById(@Param('id') id: string) {
-        return this.courseService.findById(id);
+    async findById(@Param('id') id: string) {
+        return await this.courseService.findById(id);
     }
 
     @ApiOperation({ summary: "Update course by ID" })
-    @ApiParam({ name: 'id', description: "ID of the course to update.", required: true })
+    @ApiParam({ name: 'id', description: "ID of the course to update.", type: String, format: 'uuid' }) // Explicitly define type
     @ApiBody({
         description: "Partial course data for update.",
-        schema: updateCourseValidator
+        type: UpdateCourseDto // Use the DTO type directly
     })
     @ApiHeaders([signture])
-    @ApiResponse(updateCourseResponseSchema[200])
-    @ApiResponse(updateCourseResponseSchema[401])
-    @ApiResponse({ status: 404, description: "Course not found." })
+    @ApiOkResponse({ description: "Course updated successfully", type: UpdateCourseResponseDto }) // Use type for DTOs
+    @ApiBadRequestResponse({ description: "Invalid input" })
+    @ApiUnauthorizedResponse({ description: "Unauthorized" })
+    @ApiResponse({ status: 404, description: "Course not found." }) // Keep custom 404
     @Put(':id')
-    update(@Param('id') id: string, @Body() course: Partial<Course>) {
-        return this.courseService.update(id, course);
+    async update(@Param('id') id: string, @Body() updateCourseDto: UpdateCourseDto) { // Use the DTO for the body
+        return await this.courseService.update(id, updateCourseDto);
     }
 
     @ApiOperation({ summary: "Delete course by ID" })
-    @ApiParam({ name: 'id', description: "ID of the course to delete.", required: true })
+    @ApiParam({ name: 'id', description: "ID of the course to delete.", type: String, format: 'uuid' }) // Explicitly define type
     @ApiHeaders([signture])
-    @ApiResponse(deleteCourseResponseSchema[200])
-    @ApiResponse(deleteCourseResponseSchema[401])
+    @ApiOkResponse({ description: "Course deleted successfully", type: DeleteCourseResponseDto }) // Use type for DTOs
+    @ApiBadRequestResponse({ description: "Invalid input" })
+    @ApiUnauthorizedResponse({ description: "Unauthorized" })
     @Delete(':id')
-    delete(@Param('id') id: string) {
-        return this.courseService.delete(id);
+    async delete(@Param('id') id: string) {
+        return await this.courseService.delete(id);
     }
 }

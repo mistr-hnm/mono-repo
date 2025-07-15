@@ -1,9 +1,11 @@
 
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
+import { HydratedDocument, Types } from 'mongoose';
 import { BaseSchema } from 'src/core/meta/base.schema';
 @Schema()
 export class Course extends BaseSchema {
+
+    _id: Types.ObjectId;
 
     @Prop({ required: true })
     courseId: number;

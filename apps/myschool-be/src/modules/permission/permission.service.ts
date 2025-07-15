@@ -4,37 +4,165 @@ import { Permission, PermissionDocument } from './schemas/permission.schema';
 import { Model } from 'mongoose';
 import { BadRequestException } from 'src/lib/response-exceptions';
 
+import {
+    CreatePermissionDto,
+    CreatePermissionResponseDto,
+    UpdatePermissionDto,
+    UpdatePermissionResponseDto,
+    GetPermissionResponseDto,
+    GetPermissionsResponseDto,
+    DeletePermissionResponseDto,
+    GetAllPermissionsDto 
+} from './schemas/permission.dto';
+
 @Injectable()
 export class PermissionService {
 
     constructor(
-        @InjectModel(Permission.name) private permssionModel: Model<PermissionDocument>
+        @InjectModel(Permission.name) private permissionModel: Model<PermissionDocument> 
     ) { }
 
-    create(permission: Permission): Promise<Permission> {
-        const newPermission = new this.permssionModel(permission);
-        return newPermission.save();
-    }
+    async create(createPermissionDto: CreatePermissionDto): Promise<CreatePermissionResponseDto> {
+        try { 
+            const alreadyExist = await this.permissionModel.findOne({ module: createPermissionDto.module }).select(["_id"]);
+            if (alreadyExist) {
+                throw new BadRequestException(`Permission set for module "${createPermissionDto.module}" already exists.`);
+            }
 
-   async findAll(): Promise<any> {
-        try {
-            const permissions = await this.permssionModel.find().exec();
-            return { success: true, data: permissions };
-        } catch (err) {
-            throw new BadRequestException();
+            const newPermission = new this.permissionModel(createPermissionDto);
+            const savedPermission = await newPermission.save();
+
+            return {
+                success: true,
+                data: {
+                    _id: savedPermission._id.toString(),
+                    module: savedPermission.module,
+                    permission: savedPermission.permission,
+                    description: savedPermission.description, 
+                }
+            };
+        } catch (e) {
+            if (e instanceof BadRequestException) {
+                throw e;
+            }
+            throw new BadRequestException("Permission creation failed.");
         }
     }
 
-    findById(id: string): Promise<Permission | null> {
-        const permission = this.permssionModel.findById(id).exec();
-        return permission;
+    async findAll(getAllPermissionsDto?: GetAllPermissionsDto): Promise<GetPermissionsResponseDto> {
+        try {
+            const { limit, offset } = getAllPermissionsDto || {};
+
+            const query = this.permissionModel.find();
+
+            if (limit !== undefined && offset !== undefined) {
+                query.limit(limit).skip(offset);
+            }
+
+            const permissions = await query.exec();
+
+            if (!permissions || permissions.length === 0) {
+                return {
+                    success: false,
+                    message: "No permissions found."
+                };
+            }
+
+            return {
+                success: true,
+                data: permissions.map(permission => ({
+                    _id: permission._id.toString(),
+                    module: permission.module,
+                    permission: permission.permission,
+                    description: permission.description, 
+                }))
+            };
+        } catch (err) {
+            throw new BadRequestException("Failed to retrieve permissions.");
+        }
     }
 
-    update(id: string, permission: Partial<Permission>): Promise<Permission | null> {
-        return this.permssionModel.findByIdAndUpdate(id, permission, { new: true }).exec();
+    async findById(id: string): Promise<GetPermissionResponseDto> {
+        try {
+            const permission = await this.permissionModel.findById(id).exec();
+
+            if (!permission) {
+                return {
+                    success: false,
+                    message: `Permission with ID "${id}" not found.`
+                };
+            }
+
+            return {
+                success: true,
+                data: {
+                    _id: permission._id.toString(),
+                    module: permission.module,
+                    permission: permission.permission,
+                    description: permission.description
+                }
+            };
+        } catch (e) {
+            throw new BadRequestException(`Failed to find permission with ID "${id}".`);
+        }
     }
 
-    delete(id: string): Promise<Permission | null> {
-        return this.permssionModel.findByIdAndDelete(id).exec();
+    async update(id: string, updatePermissionDto: UpdatePermissionDto): Promise<UpdatePermissionResponseDto> {
+        try {
+            // Check for duplicate module name if it's being updated and if it's different from the current one
+            if (updatePermissionDto.module) {
+                const existingPermissionWithModule = await this.permissionModel.findOne({
+                    module: updatePermissionDto.module,
+                    _id: { $ne: id } // Exclude the current permission set
+                }).exec();
+                if (existingPermissionWithModule) {
+                    throw new BadRequestException(`Permission set for module "${updatePermissionDto.module}" already exists.`);
+                }
+            }
+
+            const updatedPermission = await this.permissionModel.findByIdAndUpdate(id, updatePermissionDto, { new: true }).exec();
+
+            if (!updatedPermission) {
+                return {
+                    success: false,
+                    message: `Permission with ID "${id}" not found for update.`
+                };
+            }
+
+            return {
+                success: true,
+                data: {
+                    _id: updatedPermission._id.toString(),
+                    module: updatedPermission.module,
+                    permission: updatedPermission.permission,
+                    description: updatedPermission.description, 
+                }
+            };
+        } catch (e) {
+            if (e instanceof BadRequestException) {
+                throw e;
+            }
+            throw new BadRequestException(`Failed to update permission with ID "${id}".`);
+        }
+    }
+
+    async delete(id: string): Promise<DeletePermissionResponseDto> {
+        try {
+            const deletedPermission = await this.permissionModel.findByIdAndDelete(id).exec();
+
+            if (!deletedPermission) {
+                return {
+                    success: false,
+                    message: `Permission with ID "${id}" not found for deletion.`
+                };
+            }
+
+            return {
+                success: true,
+                message: `Permission with ID "${id}" deleted successfully.`
+            };
+        } catch (e) {
+            throw new BadRequestException(`Failed to delete permission with ID "${id}".`);
+        }
     }
 }

@@ -1,0 +1,227 @@
+import { ApiProperty } from '@nestjs/swagger';
+import { IsString, IsEmail, IsNotEmpty, IsOptional, isEmpty } from 'class-validator';
+
+export class LoginUserDto {
+
+    @ApiProperty({ example: "mistrhnm@gmail.com" })
+    @IsEmail()
+    @IsNotEmpty()
+    readonly email: string;
+
+    @ApiProperty({ example: "Pass#123" })
+    @IsString()
+    @IsNotEmpty()
+    readonly password: string;
+}
+export class LoginUserResponseDto {
+    @ApiProperty({ example: true, description: 'The identification of operation' })
+    success: boolean;
+
+    @ApiProperty({
+        example: {
+            user: 'jh3h434h3i4h34',
+            email: 'john@example.com',
+            token: '3ds34dsr54dsds98ds9d8s9d9sdsds8d9asyd989s8yfasdasd897asd98as',
+            createdAt: new Date().toString(),
+            permission: [],
+
+        },
+        description: 'The response data object',
+    })
+    data: {
+        user: string;
+        email: string;
+        token: string;
+        createdAt?: string;
+        permission ?: any[]
+    };
+}
+
+
+
+export class CreateUserDto {
+    @ApiProperty({ example: "John Doe", description: "The name of the user" })
+    @IsString()
+    @IsNotEmpty()
+    readonly name: string;
+
+    @ApiProperty({ example: "john@example.com", description: "The email of the user" })
+    @IsEmail()
+    @IsNotEmpty()
+    readonly email: string;
+
+    @ApiProperty({ example: "Pass#123", description: "The password of the user" })
+    @IsString()
+    @IsNotEmpty()
+    readonly password: string;
+
+    @ApiProperty({ example: "A brief description about the user", description: "Additional description about the user", required: false })
+    @IsString()
+    @IsOptional()
+    readonly description?: string;
+}
+
+// / --- Create User Response DTO ---
+export class CreateUserResponseDto {
+    @ApiProperty({ example: true, description: 'Indicates if the user creation was successful' })
+    success: boolean;
+
+    @ApiProperty({
+        example: {
+            _id: '60c72b2f9b1e8b0015b0e4d7',
+            name: 'John Doe',
+            email: 'john.doe@example.com',
+            description: 'A new user created via the API'
+        },
+        description: 'The created user data object',
+    })
+    data: {
+        _id: string; // Assuming your BaseSchema adds an _id
+        name: string;
+        email: string;
+        description?: string;
+    };
+}
+
+
+export class UpdateUserDto {
+    @ApiProperty({ example: "12345", description: "The unique identifier of the user" })
+    @IsString()
+    @IsNotEmpty()
+    readonly id: string;
+
+    @ApiProperty({ example: "John Doe Updated", description: "The updated name of the user", required: false })
+    @IsString()
+    @IsOptional()
+    readonly name?: string;
+
+    @ApiProperty({ example: "john.updated@example.com", description: "The updated email of the user", required: false })
+    @IsEmail()
+    @IsOptional()
+    readonly email?: string;
+
+    @ApiProperty({ example: "UpdatedPass#123", description: "The updated password of the user", required: false })
+    @IsString()
+    @IsOptional()
+    readonly password?: string;
+
+    @ApiProperty({ example: "Updated description about the user", description: "Additional description about the user", required: false })
+    @IsString()
+    @IsOptional()
+    readonly description?: string;
+}
+
+// --- Update User Response DTO ---
+export class UpdateUserResponseDto {
+    @ApiProperty({ example: true, description: 'Indicates if the user update was successful' })
+    success: boolean;
+
+    @ApiProperty({
+        example: {
+            _id: '60c72b2f9b1e8b0015b0e4d7',
+            name: 'John Doe Updated',
+            email: 'john.doe.updated@example.com',
+            description: 'User description updated',
+        },
+        description: 'The updated user data object',
+    })
+    data: {
+        _id: string;
+        name?: string;
+        email?: string;
+        description?: string;
+    };
+}
+
+
+export class GetUserByIdDto {
+    @ApiProperty({ example: "12345", description: "The unique identifier of the user" })
+    @IsString()
+    @IsNotEmpty()
+    readonly id: string;
+}
+// --- Get User Response DTO (for single user retrieval) ---
+export class GetUserResponseDto {
+    @ApiProperty({ example: true, description: 'Indicates if the operation was successful' })
+    success: boolean;
+
+    @ApiProperty({
+        example: {
+            _id: '60c72b2f9b1e8b0015b0e4d7',
+            name: 'John Doe',
+            email: 'john.doe@example.com',
+            description: 'A brief description of the user', 
+        },
+        description: 'The user data object',
+    })
+    data?: {
+        _id: string; // Assuming your BaseSchema adds an _id
+        name: string;
+        email: string;
+        description?: string; 
+    };
+    @ApiProperty({ example: 'User not found', description: 'A message detailing the outcome (optional, present if success is false)', required: false })
+    message?: string; // Add an optional message property for error cases
+}
+
+
+
+export class GetAllUsersDto {
+    @ApiProperty({ example: 10, description: "The number of users to retrieve per page", required: false })
+    @IsOptional()
+    readonly limit?: number;
+
+    @ApiProperty({ example: 0, description: "The offset for pagination", required: false })
+    @IsOptional()
+    readonly offset?: number;
+}
+// --- Get Users Response DTO (for listing multiple users) ---
+export class GetUsersResponseDto {
+    @ApiProperty({ example: true, description: 'Indicates if the operation was successful' })
+    success: boolean;
+
+    @ApiProperty({
+        type: [GetUserResponseDto], // Array of single user response DTOs
+        example: [
+            {
+                _id: '60c72b2f9b1e8b0015b0e4d7',
+                name: 'John Doe',
+                email: 'john.doe@example.com',
+                description: 'A brief description of the user', 
+            },
+            {
+                _id: '60c72b2f9b1e8b0015b0e4d8',
+                name: 'Jane Smith',
+                email: 'jane.smith@example.com',
+                description: 'Another user description', 
+            },
+        ],
+        description: 'An array of user data objects',
+    })
+    data?: {
+        _id: string;
+        name: string;
+        email: string;
+        description?: string; 
+    }[];
+    @ApiProperty({ example: 'User not found', description: 'A message detailing the outcome (optional, present if success is false)', required: false })
+    message?: string; // Add an optional message property for error cases
+
+}
+
+
+export class DeleteUserDto {
+    @ApiProperty({ example: "12345", description: "The unique identifier of the user to delete" })
+    @IsString()
+    @IsNotEmpty()
+    readonly id: string;
+}
+
+// --- Delete User Response DTO ---
+export class DeleteUserResponseDto {
+    @ApiProperty({ example: true, description: 'Indicates if the operation was successful' })
+    success: boolean;
+
+    @ApiProperty({ example: 'User deleted successfully', description: 'A message indicating the outcome of the deletion' })
+    message: string;
+}

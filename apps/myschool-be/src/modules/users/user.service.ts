@@ -4,11 +4,11 @@ import { User, UserDocument } from './schemas/user.schema';
 
 import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
-import { LoginUserBody } from '@myschool/schema/src/api';
 import { JwtService } from '@nestjs/jwt';
 import { BadRequestException, NotFoundException, UnauthorizedException } from 'src/lib/response-exceptions';
 import { PermissionService } from '../permission/permission.service';
 import { CacheService } from '../../shared/cache/cache.service';
+import { CreateUserDto, CreateUserResponseDto, DeleteUserResponseDto, GetUserResponseDto, GetUsersResponseDto, LoginUserDto, LoginUserResponseDto, UpdateUserDto, UpdateUserResponseDto } from './schemas/user.dto';
 
 
 @Injectable()
@@ -22,64 +22,128 @@ export class UserService {
         private jwtService: JwtService,
     ) { }
 
-    async login(user: LoginUserBody): Promise<any> {
-        try {           
-            const existUser = await this.userModel.findOne({ email: user.email }).select(["_id","password"]);
+    async login(loginUserDto: LoginUserDto): Promise<LoginUserResponseDto> {
+        try {
+            const existUser = await this.userModel.findOne({ email: loginUserDto.email }).select(["_id", "password"]);
             if (!existUser) throw new NotFoundException();
 
-            const isMatch = await bcrypt.compare(user.password, existUser.password);
+            const isMatch = await bcrypt.compare(loginUserDto.password, existUser.password);
             if (!isMatch) throw new UnauthorizedException();
-            
-            const payload = { sub : existUser._id, email : user.email }
+
+            const payload = { sub: existUser._id, email: loginUserDto.email }
             const token = await this.jwtService.signAsync(payload)
-            
+
             const permission = await this.permissionService.findAll()
 
-            await this.cacheService.addToCache('permission',JSON.stringify(permission.data));
-            
+            await this.cacheService.addToCache('permission', JSON.stringify(permission.data));
+
             return {
-                sucess : true,
-                data : { user : existUser._id, email : user.email, token : token , permission : permission.data }
+                success: true,
+                data: { user: existUser._id.toString(), email: loginUserDto.email, token: token, permission: permission.data }
             };
         } catch (e) {
+            console.log("e", e);
             throw new BadRequestException("User failed to login");
         }
     }
 
-    async create(user: User): Promise<any> {
+    async create(createUserDto: CreateUserDto): Promise<CreateUserResponseDto> {
         try {
-            const alreadyExist = await this.userModel.findOne({ email: user.email }).select(["_id"]);
+            const alreadyExist = await this.userModel.findOne({ email: createUserDto.email }).select(["_id"]);
             if (alreadyExist) throw new BadRequestException("Already exist.");
 
-            const hash = await bcrypt.hash(user.password, 10);
-            const payLoad = { ...user, password: hash };
+            const hash = await bcrypt.hash(createUserDto.password, 10);
+            const payLoad = { ...createUserDto, password: hash };
 
             const newUser = new this.userModel(payLoad);
             await newUser.save();
+
             return {
-                sucess : true,
-                data : {  message: "User created", code : 200 }
+                success: true,
+                data: {
+                    _id: newUser.id,
+                    name: newUser.name,
+                    email: newUser.email,
+                    description: newUser.description,
+                }
             };
         } catch (e) {
             throw new BadRequestException("User creation failed.");
         }
     }
 
-    findAll(): Promise<User[]> {
-        return this.userModel.find();
+    async findAll(): Promise<GetUsersResponseDto> {
+        const user = await this.userModel.find();
+        if (!user) {
+            return {
+                success: false,
+                message: `Users not found.`
+            };
+        }
+        return {
+            success: true,
+            data: user.map((user) => {
+                return {
+                    _id: user.id,
+                    name: user.name,
+                    email: user.email,
+                    description: user.description,
+                }
+            })
+        };
     }
 
-    findById(id: string): Promise<User | null> {
-        const user = this.userModel.findById(id);
-        return user;
+    async findById(id: string): Promise<GetUserResponseDto> {
+        const user = await this.userModel.findById(id);
+        if (!user) {
+            return {
+                success: false,
+                message: `User with ID "${id}" not found.`
+            };
+        }
+        return {
+            success: true,
+            data: {
+                _id: user.id,
+                name: user.name,
+                email: user.email,
+                description: user.description,
+            }
+        };
     }
 
-    update(id: string, user: Partial<User>): Promise<User | null> {
-        return this.userModel.findByIdAndUpdate(id, user, { new: true }).exec();
+    async update(id: string, updateUserDto: UpdateUserDto): Promise<UpdateUserResponseDto> {
+        try {
+            const updatedUser = await this.userModel.findByIdAndUpdate(id, updateUserDto, { new: true }).exec();
+
+            return {
+                success: true,
+                data: {
+                    _id: updatedUser?.id,
+                    name: updatedUser?.name,
+                    email: updatedUser?.email,
+                    description: updatedUser?.description,
+                }
+            };
+        } catch (e) {
+            throw new BadRequestException("User creation failed.");
+        }
     }
 
-    delete(id: string): Promise<User | null> {
-        return this.userModel.findByIdAndDelete(id).exec();
+    async delete(id: string): Promise<DeleteUserResponseDto> {
+        try {
+            const deletedUser = await this.userModel.findByIdAndDelete(id).exec();
+            if (!deletedUser) {
+                return {
+                    success: false,
+                    message: `User with ID "${id}" not found for deletion.`
+                };
+            }
+
+            return { success: true, message: "User deleted successfully." }
+        } catch (e) {
+            throw new BadRequestException("User deletion failed.");
+        }
     }
 
 }

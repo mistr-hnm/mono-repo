@@ -1,11 +1,9 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, Req } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put } from '@nestjs/common';
 import { UserService } from './user.service';
-import type { LoginUserBody } from "@myschool/schema/src/api";
-import { User } from './schemas/user.schema';
-import { ApiBody, ApiHeaders, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
+import { ApiBody, ApiHeaders, ApiOperation, ApiParam, ApiBadRequestResponse, ApiUnauthorizedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { signture } from 'src/core/meta/global.header';
-import { createUserValidator, loginValidator, updateUserValidator } from './schemas/user.validator';
-import { createUserResponseSchema, deleteUserResponseSchema, getAllUsersResponseSchema, getUserResponseSchema, loginResponseSchema, updateUserResponseSchema } from './schemas/user.response';
+import { CreateUserDto, CreateUserResponseDto, DeleteUserResponseDto, GetUserByIdDto, GetUsersResponseDto, LoginUserDto, LoginUserResponseDto, UpdateUserDto, UpdateUserResponseDto } from './schemas/user.dto';
+
 
 @Controller()
 export class UserController {
@@ -14,36 +12,38 @@ export class UserController {
     ) { }
 
     @ApiOperation({ summary: "User login" })
+    @ApiHeaders([signture])
     @ApiBody({
         description: "User credentials for login. Provide a valid email and password.",
-        schema: loginValidator
+        type: LoginUserDto
     })
-    @ApiHeaders([signture])
-    @ApiResponse(loginResponseSchema[200])
-    @ApiResponse(loginResponseSchema[401])
+    @ApiBadRequestResponse({ description: "Invalid input" })
+    @ApiUnauthorizedResponse({ description: "Unautherized" })
+    @ApiOkResponse({ description: "Logged in successfully", type: LoginUserResponseDto })
     @HttpCode(200)
     @Post("/login")
-    async login(@Body() user: LoginUserBody) {
-        return await this.userService.login(user);  // @todo : move this to auth service
+    async login(@Body() loginUserDto: LoginUserDto) {
+        return await this.userService.login(loginUserDto);  // @todo : move this to auth service
     }
 
     @ApiOperation({ summary: "Create a new user" })
     @ApiBody({
         description: "User data for creation.",
-        schema:  createUserValidator  
+        type: CreateUserDto
     })
-    @ApiHeaders([signture, ])
-    @ApiResponse(createUserResponseSchema[200])
-    @ApiResponse(createUserResponseSchema[401])
+    @ApiHeaders([signture])
+    @ApiBadRequestResponse({ description: "Invalid input" })
+    @ApiUnauthorizedResponse({ description: "Unautherized" })
+    @ApiOkResponse({ description: "User created successfully", type: CreateUserResponseDto })
     @Post("signup")
-    async create(@Body() user: User) {
-        return await this.userService.create(user);
+    async create(@Body() createUserDto: CreateUserDto) {
+        return await this.userService.create(createUserDto);
     }
 
     @ApiOperation({ summary: "Get all users" })
-    @ApiHeaders([signture, ])
-    @ApiResponse(getAllUsersResponseSchema[200])
-    @ApiResponse(getAllUsersResponseSchema[401])
+    @ApiHeaders([signture])
+    @ApiUnauthorizedResponse({ description: "Unautherized" })
+    @ApiOkResponse({ description: "User fetched successfully", type: GetUsersResponseDto })
     @Get()
     findAll() {
         return this.userService.findAll();
@@ -52,8 +52,8 @@ export class UserController {
     @ApiOperation({ summary: "Get user by ID" })
     @ApiParam({ name: 'id', description: "ID of the user to retrieve.", required: true })
     @ApiHeaders([signture])
-    @ApiResponse(getUserResponseSchema[200])
-    @ApiResponse(getUserResponseSchema[401])
+    @ApiUnauthorizedResponse({ description: "Unautherized" })
+    @ApiOkResponse({ description: "User fetched successfully", type: GetUserByIdDto })
     @Get(':id')
     findById(@Param('id') id: string) {
         return this.userService.findById(id);
@@ -63,24 +63,26 @@ export class UserController {
     @ApiParam({ name: 'id', description: "ID of the user to update.", required: true })
     @ApiBody({
         description: "Partial user data for update.",
-        schema: updateUserValidator
+        type: UpdateUserDto
     })
     @ApiHeaders([signture])
-    @ApiResponse(updateUserResponseSchema[200])
-    @ApiResponse(updateUserResponseSchema[401])
-    @ApiResponse({ status: 404, description: "User not found." })
+    @ApiBadRequestResponse({ description: "Invalid input" })
+    @ApiUnauthorizedResponse({ description: "Unautherized" })
+    @ApiOkResponse({ description: "User updated successfully", type: UpdateUserResponseDto })
     @Put(':id')
-    update(@Param('id') id: string, @Body() course: Partial<User>) {
-        return this.userService.update(id, course);
+    update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+        return this.userService.update(id, updateUserDto);
     }
 
     @ApiOperation({ summary: "Delete user by ID" })
     @ApiParam({ name: 'id', description: "ID of the user to delete.", required: true })
     @ApiHeaders([signture])
-    @ApiResponse(deleteUserResponseSchema[200])
-    @ApiResponse(deleteUserResponseSchema[401])
+    @ApiBadRequestResponse({ description: "Invalid input" })
+    @ApiUnauthorizedResponse({ description: "Unautherized" })
+    @ApiOkResponse({ description: "User deleted successfully", type: DeleteUserResponseDto })
     @Delete(':id')
     delete(@Param('id') id: string) {
         return this.userService.delete(id);
     }
 }
+
