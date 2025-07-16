@@ -4,6 +4,7 @@ import { json, urlencoded } from 'express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import { apiReference } from '@scalar/nestjs-api-reference'
 import { ValidationPipe } from '@nestjs/common';
+import { AllExceptionFilter } from './middleware/exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
@@ -82,6 +83,7 @@ async function bootstrap() {
   app.enableCors("*")
   app.setGlobalPrefix("api/v1/")
   app.useGlobalPipes(new ValidationPipe({whitelist : true, forbidNonWhitelisted : true}));
+  app.useGlobalFilters(new AllExceptionFilter())
 
   app.use(json({ limit: '50mb' }))
   app.use(urlencoded({ extended: true, limit: '50mb' }))

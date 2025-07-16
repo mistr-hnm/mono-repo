@@ -9,9 +9,9 @@ export class CreatePermissionDto {
 
     @ApiProperty({ example: ["read", "write", "delete"], description: "An array of permission actions within the module (e.g., 'read', 'write', 'update', 'delete')", isArray: true, type: String })
     @IsArray()
-    @IsString({ each: true }) // Each item in the array must be a string
-    @IsNotEmpty({ each: true }) // Each item in the array must not be empty
-    @ArrayUnique() // Ensures all elements in the array are unique
+    @IsString({ each: true }) 
+    @IsNotEmpty({ each: true })
+    @ArrayUnique() 
     readonly permission: string[];
 
     @ApiProperty({ example: "Allows managing user accounts.", description: "A brief description of this permission set", required: false })
@@ -22,7 +22,7 @@ export class CreatePermissionDto {
  
 export class CreatePermissionResponseDto {
     @ApiProperty({ example: true, description: 'Indicates if the permission creation was successful' })
-    success: boolean;
+    status: boolean;
 
     @ApiProperty({
         example: {
@@ -34,11 +34,13 @@ export class CreatePermissionResponseDto {
         description: 'The created permission data object',
     })
     data: {
-        _id: string; // Assuming BaseSchema adds _id
+        _id: string;
         module: string;
         permission: string[];
         description?: string; 
     };
+    @ApiProperty({ example: 'Permission created', description: 'A message detailing the outcome (optional, present if success is false)'  })
+    message: string;
 }
  
 export class UpdatePermissionDto {
@@ -69,7 +71,7 @@ export class UpdatePermissionDto {
 
 export class UpdatePermissionResponseDto {
     @ApiProperty({ example: true, description: 'Indicates if the permission update was successful' })
-    success: boolean;
+    status: boolean;
 
     @ApiProperty({
         example: {
@@ -87,8 +89,8 @@ export class UpdatePermissionResponseDto {
         description?: string; 
     };
 
-    @ApiProperty({ example: 'Permission not found', description: 'A message detailing the outcome (optional, present if success is false)', required: false })
-    message?: string;
+    @ApiProperty({ example: 'Permission not found', description: 'A message detailing the outcome (optional, present if success is false)'  })
+    message: string;
 }
  
 export class GetPermissionByIdDto {
@@ -101,7 +103,7 @@ export class GetPermissionByIdDto {
  
 export class GetPermissionResponseDto {
     @ApiProperty({ example: true, description: 'Indicates if the operation was successful' })
-    success: boolean;
+    status: boolean;
 
     @ApiProperty({
         example: {
@@ -120,8 +122,8 @@ export class GetPermissionResponseDto {
         description?: string; 
     };
 
-    @ApiProperty({ example: 'Permission not found', description: 'A message detailing the outcome (optional, present if success is false)', required: false })
-    message?: string;
+    @ApiProperty({ example: 'Permission not found', description: 'A message detailing the outcome (optional, present if success is false)'  })
+    message: string;
 }
  
 export class GetAllPermissionsDto {
@@ -140,7 +142,7 @@ export class GetAllPermissionsDto {
  
 export class GetPermissionsResponseDto {
     @ApiProperty({ example: true, description: 'Indicates if the operation was successful' })
-    success: boolean;
+    status: boolean;
 
     @ApiProperty({
         type: [GetPermissionResponseDto], // Array of single permission response DTOs
@@ -167,8 +169,8 @@ export class GetPermissionsResponseDto {
         description?: string; 
     }[];
 
-    @ApiProperty({ example: 'No permissions found', description: 'A message detailing the outcome (optional, present if success is false)', required: false })
-    message?: string;
+    @ApiProperty({ example: 'No permissions found', description: 'A message detailing the outcome (optional, present if success is false)'  })
+    message: string;
 }
  
 export class DeletePermissionDto {
@@ -182,7 +184,7 @@ export class DeletePermissionDto {
 
 export class DeletePermissionResponseDto {
     @ApiProperty({ example: true, description: 'Indicates if the operation was successful' })
-    success: boolean;
+    status: boolean;
 
     @ApiProperty({ example: 'Permission deleted successfully', description: 'A message indicating the outcome of the deletion' })
     message: string;

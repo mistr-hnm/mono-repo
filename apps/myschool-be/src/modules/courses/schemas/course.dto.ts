@@ -23,7 +23,7 @@ export class CreateCourseDto {
 // --- Create Course Response DTO ---
 export class CreateCourseResponseDto {
     @ApiProperty({ example: true, description: 'Indicates if the course creation was successful' })
-    success: boolean;
+    status: boolean;
 
     @ApiProperty({
         example: {
@@ -40,6 +40,8 @@ export class CreateCourseResponseDto {
         name: string;
         description?: string; 
     };
+    @ApiProperty({ example: 'courses created successfully', description: 'A message detailing the outcome', required: false })
+    message: string;
 }
 
 // --- Update Course DTO ---
@@ -69,7 +71,7 @@ export class UpdateCourseDto {
 // --- Update Course Response DTO ---
 export class UpdateCourseResponseDto {
     @ApiProperty({ example: true, description: 'Indicates if the course update was successful' })
-    success: boolean;
+    status: boolean;
 
     @ApiProperty({
         example: {
@@ -86,8 +88,8 @@ export class UpdateCourseResponseDto {
         name: string;
         description?: string; 
     };
-    @ApiProperty({ example: 'User not found', description: 'A message detailing the outcome (optional, present if success is false)', required: false })
-    message?: string; // Add an optional message property for error cases
+    @ApiProperty({ example: 'courses updated successfully', description: 'A message detailing the outcome', required: false })
+    message: string;
 }
 
 // --- Get Course by ID DTO ---
@@ -101,7 +103,7 @@ export class GetCourseByIdDto {
 // --- Get Course Response DTO (for single course retrieval) ---
 export class GetCourseResponseDto {
     @ApiProperty({ example: true, description: 'Indicates if the operation was successful' })
-    success: boolean;
+    status: boolean;
 
     @ApiProperty({
         example: {
@@ -120,8 +122,8 @@ export class GetCourseResponseDto {
         description?: string; 
     };
 
-    @ApiProperty({ example: 'Course not found', description: 'A message detailing the outcome (optional, present if success is false)', required: false })
-    message?: string;
+    @ApiProperty({ example: 'course fetched successfully', description: 'A message detailing the outcome', required: false })
+    message: string;
 }
 
 // --- Get All Courses DTO ---
@@ -142,7 +144,7 @@ export class GetAllCoursesDto {
 // --- Get Courses Response DTO (for listing multiple courses) ---
 export class GetCoursesResponseDto {
     @ApiProperty({ example: true, description: 'Indicates if the operation was successful' })
-    success: boolean;
+    status: boolean;
 
     @ApiProperty({
         type: [GetCourseResponseDto], // Array of single course response DTOs
@@ -169,8 +171,8 @@ export class GetCoursesResponseDto {
         description?: string; 
     }[];
 
-    @ApiProperty({ example: 'No courses found', description: 'A message detailing the outcome (optional, present if success is false)', required: false })
-    message?: string;
+    @ApiProperty({ example: 'courses fetched successfully', description: 'A message detailing the outcome', required: false })
+    message: string;
 }
 
 // --- Delete Course DTO ---
@@ -184,7 +186,7 @@ export class DeleteCourseDto {
 // --- Delete Course Response DTO ---
 export class DeleteCourseResponseDto {
     @ApiProperty({ example: true, description: 'Indicates if the operation was successful' })
-    success: boolean;
+    status: boolean;
 
     @ApiProperty({ example: 'Course deleted successfully', description: 'A message indicating the outcome of the deletion' })
     message: string;

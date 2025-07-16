@@ -15,7 +15,7 @@ export class LoginUserDto {
 }
 export class LoginUserResponseDto {
     @ApiProperty({ example: true, description: 'The identification of operation' })
-    success: boolean;
+    status: boolean;
 
     @ApiProperty({
         example: {
@@ -35,6 +35,8 @@ export class LoginUserResponseDto {
         createdAt?: string;
         permission ?: any[]
     };
+    @ApiProperty({ example: 'Loggedin successfully.', description: 'A message detailing the outcome', required: true })
+    message: string;
 }
 
 
@@ -64,7 +66,7 @@ export class CreateUserDto {
 // / --- Create User Response DTO ---
 export class CreateUserResponseDto {
     @ApiProperty({ example: true, description: 'Indicates if the user creation was successful' })
-    success: boolean;
+    status: boolean;
 
     @ApiProperty({
         example: {
@@ -76,11 +78,14 @@ export class CreateUserResponseDto {
         description: 'The created user data object',
     })
     data: {
-        _id: string; // Assuming your BaseSchema adds an _id
+        _id: string; 
         name: string;
         email: string;
         description?: string;
     };
+
+    @ApiProperty({ example: 'User created.', description: 'A message detailing the outcome', required: true })
+    message: string;
 }
 
 
@@ -114,7 +119,7 @@ export class UpdateUserDto {
 // --- Update User Response DTO ---
 export class UpdateUserResponseDto {
     @ApiProperty({ example: true, description: 'Indicates if the user update was successful' })
-    success: boolean;
+    status: boolean;
 
     @ApiProperty({
         example: {
@@ -131,6 +136,8 @@ export class UpdateUserResponseDto {
         email?: string;
         description?: string;
     };
+    @ApiProperty({ example: 'User updated.', description: 'A message detailing the outcome', required: true })
+    message: string;
 }
 
 
@@ -143,7 +150,7 @@ export class GetUserByIdDto {
 // --- Get User Response DTO (for single user retrieval) ---
 export class GetUserResponseDto {
     @ApiProperty({ example: true, description: 'Indicates if the operation was successful' })
-    success: boolean;
+    status: boolean;
 
     @ApiProperty({
         example: {
@@ -178,7 +185,7 @@ export class GetAllUsersDto {
 // --- Get Users Response DTO (for listing multiple users) ---
 export class GetUsersResponseDto {
     @ApiProperty({ example: true, description: 'Indicates if the operation was successful' })
-    success: boolean;
+    status: boolean;
 
     @ApiProperty({
         type: [GetUserResponseDto], // Array of single user response DTOs
@@ -204,8 +211,9 @@ export class GetUsersResponseDto {
         email: string;
         description?: string; 
     }[];
+    
     @ApiProperty({ example: 'User not found', description: 'A message detailing the outcome (optional, present if success is false)', required: false })
-    message?: string; // Add an optional message property for error cases
+    message: string; // Add an optional message property for error cases
 
 }
 
@@ -220,7 +228,7 @@ export class DeleteUserDto {
 // --- Delete User Response DTO ---
 export class DeleteUserResponseDto {
     @ApiProperty({ example: true, description: 'Indicates if the operation was successful' })
-    success: boolean;
+    status: boolean;
 
     @ApiProperty({ example: 'User deleted successfully', description: 'A message indicating the outcome of the deletion' })
     message: string;

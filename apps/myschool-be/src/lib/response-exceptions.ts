@@ -1,40 +1,5 @@
 import { HttpException, HttpStatus } from "@nestjs/common";
 
-
-interface SuccessResponse<T = any> {
-    success: true;
-    data: T;
-    message?: string;
-}
-
-interface ErrorResponse {
-    success: false;
-    message: string;
-    error: unknown;
-}
-
-export type ApiResponse<T = any> = SuccessResponse<T> | ErrorResponse;
-
-interface CreateReponseOptions {
-    status: number,
-    data: ApiResponse,
-    headers?: HeadersInit
-}
-
-
-export function createResponse({ status, data, headers = {} } : CreateReponseOptions) : Response {
-    const finalHeaders = new Headers({
-        "Content-Type": "application/json",
-        ...(headers instanceof Headers ? Object.fromEntries(headers.entries()) : headers),
-      });
-    
-      return new Response(JSON.stringify(data), {
-        headers: finalHeaders,
-        status,
-      });
-}
-
-
 class BaseException extends HttpException {
     constructor(status: HttpStatus, code: string, message: string, cause?: unknown) {
         super({ message, code, cause }, status);

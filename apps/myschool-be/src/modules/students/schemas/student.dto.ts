@@ -61,7 +61,7 @@ export class CreateStudentDto {
  
 export class CreateStudentResponseDto {
     @ApiProperty({ example: true, description: 'Indicates if the student creation was successful' })
-    success: boolean;
+    status: boolean;
 
     @ApiProperty({
         example: {
@@ -89,6 +89,8 @@ export class CreateStudentResponseDto {
         description?: string;
         picture?: string; 
     };
+    @ApiProperty({ example: 'Student not found', description: 'A message detailing the outcome (optional, present if success is false)', required: false })
+    message: string;
 }
  
 export class UpdateStudentDto {
@@ -134,7 +136,7 @@ export class UpdateStudentDto {
 // --- Update Student Response DTO ---
 export class UpdateStudentResponseDto {
     @ApiProperty({ example: true, description: 'Indicates if the student update was successful' })
-    success: boolean;
+    status: boolean;
 
     @ApiProperty({
         example: {
@@ -162,8 +164,9 @@ export class UpdateStudentResponseDto {
         description?: string;
         picture?: string; 
     };
+
     @ApiProperty({ example: 'Student not found', description: 'A message detailing the outcome (optional, present if success is false)', required: false })
-    message?: string;
+    message: string;
 }
 
 // --- Get Student by ID DTO ---
@@ -177,7 +180,7 @@ export class GetStudentByIdDto {
  
 export class GetStudentResponseDto {
     @ApiProperty({ example: true, description: 'Indicates if the operation was successful' })
-    success: boolean;
+    status: boolean;
 
     @ApiProperty({
         example: {
@@ -208,7 +211,7 @@ export class GetStudentResponseDto {
     };
 
     @ApiProperty({ example: 'Student not found', description: 'A message detailing the outcome (optional, present if success is false)', required: false })
-    message?: string;
+    message: string;
 }
  
 export class GetAllStudentsDto {
@@ -227,7 +230,7 @@ export class GetAllStudentsDto {
  
 export class GetStudentsResponseDto {
     @ApiProperty({ example: true, description: 'Indicates if the operation was successful' })
-    success: boolean;
+    status: boolean;
 
     @ApiProperty({
         type: [GetStudentResponseDto], // Array of single student response DTOs
@@ -272,7 +275,7 @@ export class GetStudentsResponseDto {
     }[];
 
     @ApiProperty({ example: 'No students found', description: 'A message detailing the outcome (optional, present if success is false)', required: false })
-    message?: string;
+    message: string;
 }
  
 export class DeleteStudentDto {
@@ -285,7 +288,7 @@ export class DeleteStudentDto {
 
 export class DeleteStudentResponseDto {
     @ApiProperty({ example: true, description: 'Indicates if the operation was successful' })
-    success: boolean;
+    status: boolean;
 
     @ApiProperty({ example: 'Student deleted successfully', description: 'A message indicating the outcome of the deletion' })
     message: string;
