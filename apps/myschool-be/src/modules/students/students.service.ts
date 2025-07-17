@@ -1,8 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Student, StudentDocument } from './schemas/student.schema';
-import { Model } from 'mongoose';
-import { BadRequestException, NotFoundException } from 'src/lib/response-exceptions';
+import { Model } from 'mongoose'; 
 import {
     CreateStudentDto,
     CreateStudentResponseDto,
@@ -140,8 +139,7 @@ export class StudentsService {
                 throw new BadRequestException("Another student with this enrollment number already exists.");
             }
         }
-
-        // Verify if the enrollmentCourse exists if it's being updated
+ 
         if (updateStudentDto.enrollmentCourse) {
             const course = await this.courseModel.findById(updateStudentDto.enrollmentCourse).exec();
             if (!course) {

@@ -1,8 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Course, CourseDocument } from './schemas/course.schema';
 import { Model } from 'mongoose';
-import { BadRequestException, NotFoundException } from 'src/lib/response-exceptions';
 import {
     CreateCourseDto,
     CreateCourseResponseDto,

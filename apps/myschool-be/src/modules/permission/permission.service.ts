@@ -1,8 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Permission, PermissionDocument } from './schemas/permission.schema';
 import { Model } from 'mongoose';
-import { BadRequestException, NotFoundException } from 'src/lib/response-exceptions';
 import {
     CreatePermissionDto,
     CreatePermissionResponseDto,
