@@ -1,9 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 import { BaseSchema } from 'src/core/meta/base.schema';
-
-
-@Schema()
+@Schema({ timestamps : true})
 export class User extends BaseSchema {
 
     @Prop({ required: true })

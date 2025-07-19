@@ -1,4 +1,4 @@
-import { zodResolver } from "@hookform/resolvers/zod";
+import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { userBodySchema } from "@myschool/schema/api/user";
 import { useForm } from "react-hook-form";
@@ -44,7 +44,7 @@ export function Signup() {
   }
 
   const signUpForm = useForm<any>({
-    resolver: zodResolver(userBodySchema),
+    resolver: standardSchemaResolver(userBodySchema),
     defaultValues : {
       name     : "",
       email    : "",

@@ -1,6 +1,6 @@
-import { zodResolver } from "@hookform/resolvers/zod";
+import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { loginUserBodySchema } from "@myschool/schema/api/auth";
+import { loginUserBodySchema, type LoginUserBody } from "@myschool/schema/api/auth";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,25 +29,25 @@ export function Login() {
   const navigate = useNavigate()
 
   const useLoginUserMutation = useLoginUser()
-  
+
   const onSubmit = () => {
-    const input = { ...loginForm.getValues()}
-        
+    const input = { ...loginForm.getValues() }
+
     useLoginUserMutation.mutate(input, {
       onSuccess: (response) => {
-        toast("Logged in successfully.")
-        localStorage.setItem("auth",JSON.stringify(response.data))
+        toast.success("Logged in successfully.")
+        localStorage.setItem("auth", JSON.stringify(response.data))
         navigate({ to: '/' })
       },
-      onError: (error  :any) => {
-        const msg = error?.response?.data?.message || "Something went wrong"
-        toast(msg)
+      onError: (error: any) => {
+        const msg = error?.response?.data?.message?.message || "Something went wrong"
+        toast.error(msg)
       }
     })
   }
 
-  const loginForm = useForm<any>({
-    resolver: zodResolver(loginUserBodySchema),
+  const loginForm = useForm<LoginUserBody>({
+    resolver: standardSchemaResolver(loginUserBodySchema),
     defaultValues: {
       email: "",
       password: "",

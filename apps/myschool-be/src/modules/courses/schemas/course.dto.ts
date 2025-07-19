@@ -1,8 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsNotEmpty, IsOptional, IsNumber, IsPositive, Min } from 'class-validator';
-
-// --- Create Course DTO ---
-export class CreateCourseDto {
+ export class CreateCourseDto {
     @ApiProperty({ example: 101, description: "The unique ID of the course" })
     @IsNumber()
     @IsNotEmpty()
@@ -14,13 +12,12 @@ export class CreateCourseDto {
     @IsNotEmpty()
     readonly name: string;
 
-    @ApiProperty({ example: "Learn the fundamentals of NestJS framework.", description: "A brief description of the course", required: false })
+    @ApiProperty({ example: "Learn the fundamentals of NestJS framework.", description: "A brief description of the course" })
     @IsString()
     @IsOptional()
     readonly description?: string;
 }
-
-// --- Create Course Response DTO ---
+ 
 export class CreateCourseResponseDto {
     @ApiProperty({ example: true, description: 'Indicates if the course creation was successful' })
     status: boolean;
@@ -35,43 +32,36 @@ export class CreateCourseResponseDto {
         description: 'The created course data object',
     })
     data: {
-        _id: string; // Assuming BaseSchema adds _id
+        _id: string; 
         courseId: number;
         name: string;
         description?: string; 
     };
-    @ApiProperty({ example: 'courses created successfully', description: 'A message detailing the outcome', required: false })
+    @ApiProperty({ example: 'courses created successfully', description: 'A message detailing the outcome' })
     message: string;
 }
-
-// --- Update Course DTO ---
+ 
 export class UpdateCourseDto {
-    @ApiProperty({ example: "60c72b2f9b1e8b0015b0e4d7", description: "The unique identifier of the course to update" })
-    @IsString()
-    @IsNotEmpty()
-    readonly id: string; // Assuming 'id' is the MongoDB ObjectId string
-
-    @ApiProperty({ example: 102, description: "The updated unique ID of the course", required: false })
+    
+    @ApiProperty({ example: 102, description: "The updated unique ID of the course" })
     @IsNumber()
     @IsOptional()
     @IsPositive()
     readonly courseId?: number;
 
-    @ApiProperty({ example: "Advanced NestJS Techniques", description: "The updated name of the course", required: false })
+    @ApiProperty({ example: "Advanced NestJS Techniques", description: "The updated name of the course" })
     @IsString()
     @IsOptional()
     readonly name?: string;
 
-    @ApiProperty({ example: "Dive deep into advanced NestJS concepts.", description: "The updated description of the course", required: false })
-    @IsString()
-    @IsOptional()
-    readonly description?: string;
 }
-
-// --- Update Course Response DTO ---
+ 
 export class UpdateCourseResponseDto {
     @ApiProperty({ example: true, description: 'Indicates if the course update was successful' })
     status: boolean;
+
+    @ApiProperty({ example: 'courses updated successfully', description: 'A message detailing the outcome' })
+    message: string;
 
     @ApiProperty({
         example: {
@@ -88,11 +78,9 @@ export class UpdateCourseResponseDto {
         name: string;
         description?: string; 
     };
-    @ApiProperty({ example: 'courses updated successfully', description: 'A message detailing the outcome', required: false })
-    message: string;
+ 
 }
-
-// --- Get Course by ID DTO ---
+ 
 export class GetCourseByIdDto {
     @ApiProperty({ example: "60c72b2f9b1e8b0015b0e4d7", description: "The unique identifier of the course" })
     @IsString()
@@ -100,66 +88,91 @@ export class GetCourseByIdDto {
     readonly id: string;
 }
 
-// --- Get Course Response DTO (for single course retrieval) ---
+export class CourseDto {
+    @ApiProperty({ example: 'dsd5sds8dsds87d45sd9874wewed', description: "The ID of the course" })
+    @IsNumber()
+    @IsNotEmpty()
+    @IsPositive()
+    readonly _id: number;
+
+
+    @ApiProperty({ example: 101, description: "The unique ID of the course" })
+    @IsNumber()
+    @IsNotEmpty()
+    @IsPositive()
+    readonly courseId: number;
+
+    @ApiProperty({ example: "Introduction to NestJS", description: "The name of the course" })
+    @IsString()
+    @IsNotEmpty()
+    readonly name: string;
+
+    @ApiProperty({ example: "Learn the fundamentals of NestJS framework.", description: "A brief description of the course" })
+    @IsString()
+    @IsOptional()
+    readonly description?: string;
+}
+ 
 export class GetCourseResponseDto {
     @ApiProperty({ example: true, description: 'Indicates if the operation was successful' })
     status: boolean;
 
+    @ApiProperty({ example: 'course fetched successfully', description: 'A message detailing the outcome' })
+    message: string;
+
     @ApiProperty({
+        type: [CourseDto],
         example: {
             _id: '60c72b2f9b1e8b0015b0e4d7',
             courseId: 101,
-            name: 'Introduction to NestJS',
-            description: 'Learn the fundamentals of NestJS framework.', 
+            name: 'Introduction to NestJS', 
+            createdAt: new Date().toDateString(),
         },
         description: 'The course data object (optional, present if success is true)',
-        required: false,
     })
     data?: {
         _id: string;
         courseId: number;
-        name: string;
-        description?: string; 
+        name: string; 
+        createdAt : string 
     };
+} 
 
-    @ApiProperty({ example: 'course fetched successfully', description: 'A message detailing the outcome', required: false })
-    message: string;
-}
-
-// --- Get All Courses DTO ---
 export class GetAllCoursesDto {
-    @ApiProperty({ example: 10, description: "The number of courses to retrieve per page", required: false })
+    @ApiProperty({ example: 10, description: "The number of courses to retrieve per page" })
     @IsOptional()
     @IsNumber()
     @Min(1)
     readonly limit?: number;
 
-    @ApiProperty({ example: 0, description: "The offset for pagination", required: false })
+    @ApiProperty({ example: 0, description: "The offset for pagination" })
     @IsOptional()
     @IsNumber()
     @Min(0)
     readonly offset?: number;
 }
-
-// --- Get Courses Response DTO (for listing multiple courses) ---
+ 
 export class GetCoursesResponseDto {
     @ApiProperty({ example: true, description: 'Indicates if the operation was successful' })
     status: boolean;
 
+    @ApiProperty({ example: 'courses fetched successfully', description: 'A message detailing the outcome' })
+    message: string;
+
     @ApiProperty({
-        type: [GetCourseResponseDto], // Array of single course response DTOs
+        type: [CourseDto],  
         example: [
             {
                 _id: '60c72b2f9b1e8b0015b0e4d7',
                 courseId: 101,
-                name: 'Introduction to NestJS',
-                description: 'Learn the fundamentals of NestJS framework.', 
+                name: 'Introduction to NestJS', 
+                createdAt: new Date().toDateString(),
             },
             {
                 _id: '60c72b2f9b1e8b0015b0e4d8',
                 courseId: 102,
-                name: 'Advanced NestJS',
-                description: 'Explore advanced topics in NestJS.', 
+                name: 'Advanced NestJS', 
+                createdAt: new Date().toDateString(),
             },
         ],
         description: 'An array of course data objects',
@@ -167,23 +180,18 @@ export class GetCoursesResponseDto {
     data?: {
         _id: string;
         courseId: number;
-        name: string;
-        description?: string; 
+        name: string; 
+        createdAt : string 
     }[];
-
-    @ApiProperty({ example: 'courses fetched successfully', description: 'A message detailing the outcome', required: false })
-    message: string;
 }
-
-// --- Delete Course DTO ---
+ 
 export class DeleteCourseDto {
     @ApiProperty({ example: "60c72b2f9b1e8b0015b0e4d7", description: "The unique identifier of the course to delete" })
     @IsString()
     @IsNotEmpty()
     readonly id: string;
 }
-
-// --- Delete Course Response DTO ---
+ 
 export class DeleteCourseResponseDto {
     @ApiProperty({ example: true, description: 'Indicates if the operation was successful' })
     status: boolean;

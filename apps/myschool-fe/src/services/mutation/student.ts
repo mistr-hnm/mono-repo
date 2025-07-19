@@ -10,7 +10,6 @@ export function useCreateMutation() {
     mutationFn : async (body :  any) => {
         const response = await axiosInstance.post(`${url}/students`, body)
         
-        if(response.status !== 200 ) throw await response.data; 
         return response.data.data;
      },
      onSuccess :() => {
@@ -36,7 +35,6 @@ export function useUpdateMutation() {
 }
 
 
-
 export function useDeleteMutation() {
   const queryClient = useQueryClient()
   return useMutation({
@@ -51,6 +49,3 @@ export function useDeleteMutation() {
     }
   })
 }
-
-
-

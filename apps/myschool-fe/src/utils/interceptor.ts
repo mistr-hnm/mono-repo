@@ -26,13 +26,12 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
     (response) => response,
     (error) => {
-        console.log("error", error);
         if (error?.response?.status === 401) {
-            localStorage.removeItem("auth");
+            // localStorage.removeItem("auth");
             toast.error("Authentication failed.")
-            setTimeout(() => {
-                window.location.href = "/login";
-            }, 1000);
+            // setTimeout(() => {
+            //     window.location.href = "/login";
+            // }, 1000);
         }
         return Promise.reject(error);
     }

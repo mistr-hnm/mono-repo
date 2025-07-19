@@ -5,7 +5,7 @@ import { BaseSchema } from 'src/core/meta/base.schema';
 
 export type PermissionDocument = HydratedDocument<Permission>;
 
-@Schema()
+@Schema({ timestamps : true })
 export class Permission extends BaseSchema {
 
     @Prop({required : true})

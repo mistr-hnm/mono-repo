@@ -17,6 +17,9 @@ export class LoginUserResponseDto {
     @ApiProperty({ example: true, description: 'The identification of operation' })
     status: boolean;
 
+    @ApiProperty({ example: 'Loggedin successfully.', description: 'A message detailing the outcome' })
+    message: string;
+
     @ApiProperty({
         example: {
             user: 'jh3h434h3i4h34',
@@ -33,13 +36,31 @@ export class LoginUserResponseDto {
         email: string;
         token: string;
         createdAt?: string;
-        permission ?: any[]
+        permission?: any[]
     };
-    @ApiProperty({ example: 'Loggedin successfully.', description: 'A message detailing the outcome', required: true })
-    message: string;
 }
 
+export class UserDto {
+    @ApiProperty({ example: "sdsr343redf3434rgfd454", description: "The unique identifier of the user" })
+    @IsString()
+    @IsNotEmpty()
+    readonly _id: string;
 
+    @ApiProperty({ example: "John Doe", description: "The name of the user" })
+    @IsString()
+    @IsOptional()
+    readonly name?: string;
+
+    @ApiProperty({ example: "john.d@example.com", description: "The email of the user" })
+    @IsEmail()
+    @IsOptional()
+    readonly email?: string;
+
+    @ApiProperty({ example: "Description about the user", description: "Additional description about the user" })
+    @IsString()
+    @IsOptional()
+    readonly description?: string;
+}
 
 export class CreateUserDto {
     @ApiProperty({ example: "John Doe", description: "The name of the user" })
@@ -63,12 +84,15 @@ export class CreateUserDto {
     readonly description?: string;
 }
 
-// / --- Create User Response DTO ---
 export class CreateUserResponseDto {
     @ApiProperty({ example: true, description: 'Indicates if the user creation was successful' })
     status: boolean;
 
+    @ApiProperty({ example: 'User created.', description: 'A message detailing the outcome' })
+    message: string;
+
     @ApiProperty({
+        type: [ UserDto ],
         example: {
             _id: '60c72b2f9b1e8b0015b0e4d7',
             name: 'John Doe',
@@ -78,14 +102,12 @@ export class CreateUserResponseDto {
         description: 'The created user data object',
     })
     data: {
-        _id: string; 
+        _id: string;
         name: string;
         email: string;
         description?: string;
-    };
+    }
 
-    @ApiProperty({ example: 'User created.', description: 'A message detailing the outcome', required: true })
-    message: string;
 }
 
 
@@ -95,33 +117,36 @@ export class UpdateUserDto {
     @IsNotEmpty()
     readonly id: string;
 
-    @ApiProperty({ example: "John Doe Updated", description: "The updated name of the user", required: false })
+    @ApiProperty({ example: "John Doe Updated", description: "The updated name of the user" })
     @IsString()
     @IsOptional()
     readonly name?: string;
 
-    @ApiProperty({ example: "john.updated@example.com", description: "The updated email of the user", required: false })
+    @ApiProperty({ example: "john.updated@example.com", description: "The updated email of the user" })
     @IsEmail()
     @IsOptional()
     readonly email?: string;
 
-    @ApiProperty({ example: "UpdatedPass#123", description: "The updated password of the user", required: false })
+    @ApiProperty({ example: "UpdatedPass#123", description: "The updated password of the user" })
     @IsString()
     @IsOptional()
     readonly password?: string;
 
-    @ApiProperty({ example: "Updated description about the user", description: "Additional description about the user", required: false })
+    @ApiProperty({ example: "Updated description about the user", description: "Additional description about the user" })
     @IsString()
     @IsOptional()
     readonly description?: string;
 }
 
-// --- Update User Response DTO ---
 export class UpdateUserResponseDto {
     @ApiProperty({ example: true, description: 'Indicates if the user update was successful' })
     status: boolean;
 
+    @ApiProperty({ example: 'User updated.', description: 'A message detailing the outcome' })
+    message: string;
+
     @ApiProperty({
+        type: [ UserDto ],
         example: {
             _id: '60c72b2f9b1e8b0015b0e4d7',
             name: 'John Doe Updated',
@@ -135,9 +160,7 @@ export class UpdateUserResponseDto {
         name?: string;
         email?: string;
         description?: string;
-    };
-    @ApiProperty({ example: 'User updated.', description: 'A message detailing the outcome', required: true })
-    message: string;
+    }
 }
 
 
@@ -147,17 +170,21 @@ export class GetUserByIdDto {
     @IsNotEmpty()
     readonly id: string;
 }
-// --- Get User Response DTO (for single user retrieval) ---
+
 export class GetUserResponseDto {
     @ApiProperty({ example: true, description: 'Indicates if the operation was successful' })
     status: boolean;
 
+    @ApiProperty({ example: 'User fetched successfully', description: 'A message detailing the outcome (optional, present if success is false)' })
+    message?: string;
+
     @ApiProperty({
+        type: [ UserDto ],
         example: {
             _id: '60c72b2f9b1e8b0015b0e4d7',
             name: 'John Doe',
             email: 'john.doe@example.com',
-            description: 'A brief description of the user', 
+            description: 'A brief description of the user',
         },
         description: 'The user data object',
     })
@@ -165,42 +192,43 @@ export class GetUserResponseDto {
         _id: string; // Assuming your BaseSchema adds an _id
         name: string;
         email: string;
-        description?: string; 
-    };
-    @ApiProperty({ example: 'User not found', description: 'A message detailing the outcome (optional, present if success is false)', required: false })
-    message?: string; // Add an optional message property for error cases
-}
+        description?: string;
+    }
 
+}
 
 
 export class GetAllUsersDto {
-    @ApiProperty({ example: 10, description: "The number of users to retrieve per page", required: false })
+    @ApiProperty({ example: 10, description: "The number of users to retrieve per page" })
     @IsOptional()
     readonly limit?: number;
 
-    @ApiProperty({ example: 0, description: "The offset for pagination", required: false })
+    @ApiProperty({ example: 0, description: "The offset for pagination" })
     @IsOptional()
     readonly offset?: number;
 }
-// --- Get Users Response DTO (for listing multiple users) ---
+
 export class GetUsersResponseDto {
     @ApiProperty({ example: true, description: 'Indicates if the operation was successful' })
     status: boolean;
 
+    @ApiProperty({ example: 'User not found', description: 'A message detailing the outcome (optional, present if success is false)' })
+    message: string;
+
     @ApiProperty({
-        type: [GetUserResponseDto], // Array of single user response DTOs
+        type: [ UserDto ],
         example: [
             {
                 _id: '60c72b2f9b1e8b0015b0e4d7',
                 name: 'John Doe',
                 email: 'john.doe@example.com',
-                description: 'A brief description of the user', 
+                description: 'A brief description of the user',
             },
             {
                 _id: '60c72b2f9b1e8b0015b0e4d8',
                 name: 'Jane Smith',
                 email: 'jane.smith@example.com',
-                description: 'Another user description', 
+                description: 'Another user description',
             },
         ],
         description: 'An array of user data objects',
@@ -209,11 +237,8 @@ export class GetUsersResponseDto {
         _id: string;
         name: string;
         email: string;
-        description?: string; 
-    }[];
-    
-    @ApiProperty({ example: 'User not found', description: 'A message detailing the outcome (optional, present if success is false)', required: false })
-    message: string; // Add an optional message property for error cases
+        description?: string;
+    }[]
 
 }
 
@@ -225,7 +250,6 @@ export class DeleteUserDto {
     readonly id: string;
 }
 
-// --- Delete User Response DTO ---
 export class DeleteUserResponseDto {
     @ApiProperty({ example: true, description: 'Indicates if the operation was successful' })
     status: boolean;

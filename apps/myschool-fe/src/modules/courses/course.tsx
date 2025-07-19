@@ -9,7 +9,7 @@ import {
   useReactTable,
   type VisibilityState,
   type ColumnDef
-} from "@tanstack/react-table"  
+} from "@tanstack/react-table"
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -21,7 +21,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 
-import { Button } from "@/components/ui/button"   
+import { Button } from "@/components/ui/button"
 import {
   Table,
   TableBody,
@@ -37,48 +37,47 @@ import * as z from 'zod/v4'
 import { useForm } from "react-hook-form"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { zodResolver } from "@hookform/resolvers/zod"
+import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { useCreateMutation, useDeleteMutation, useUpdateMutation } from "@/services/mutation/course"
 import { useGetCourses } from "@/services/queries/course"
- 
+import { toast } from "sonner"
+
 
 export function Courses() {
 
-  const [isLoading, setIsLoading] = useState(false);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);  
-  
-     
+  const [isLoading, setIsLoading] = useState(false)
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+
+
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = useState({})
 
   const formSchema = z.object({
-    _id : z.string().optional(),
-    courseId : z.number(),
-    name : z.string(),
-  });
+    _id: z.string().optional(),
+    courseId: z.number().min(1, "Please enter course id"),
+    name: z.string().min(1, "Please enter name"),
+  })
 
   const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues : {
-      name : "",
-      courseId : 0,
+    resolver: standardSchemaResolver(formSchema),
+    defaultValues: {
+      courseId: 0,
+      name: '',
     }
-  });
+  })
 
- 
-
-  const { isPending, data } = useGetCourses();
+  const { isError, isPending, data } = useGetCourses();
   const createMutation = useCreateMutation();
   const updateMutation = useUpdateMutation();
   const deleteMutation = useDeleteMutation();
-  
-  
+
+
   const columns: ColumnDef<Course>[] = [
     {
       accessorKey: "courseId",
-      header: "Course Id",    
+      header: "Course Id",
       cell: ({ row }) => (
         <div className="capitalize text-center">{row.getValue("courseId")}</div>
       ),
@@ -109,19 +108,19 @@ export function Courses() {
     {
       id: "actions",
       enableHiding: false,
-      cell: ({ row }) => { 
+      cell: ({ row }) => {
         return (
           <div className="flex justify-end ">
-          <Button variant="outline" disabled={isLoading}  onClick={() => {
-            onEdit(row.original);
-          }}>
-            Edit
-          </Button>
-          <Button variant="outline" className="mx-2" disabled={isLoading}  onClick={() => {
-            onDelete(row.original);
-          }}>
-            Delete
-          </Button>
+            <Button variant="outline" disabled={isLoading} onClick={() => {
+              onEdit(row.original);
+            }}>
+              Edit
+            </Button>
+            <Button variant="outline" className="mx-2" disabled={isLoading} onClick={() => {
+              onDelete(row.original);
+            }}>
+              Delete
+            </Button>
           </div>
         )
       },
@@ -129,7 +128,7 @@ export function Courses() {
   ]
 
   const table = useReactTable({
-    data : data,
+    data: data,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -147,70 +146,118 @@ export function Courses() {
     },
   })
 
-     
-  const onSubmit = async()=> {
+
+  const onSubmit = async () => {
+    const result = formSchema.safeParse({ ...form.getValues() });
+
+    if (!result.success) {
+      toast.error("validation failed")
+      return
+    }
     
-    try {
-      const result = formSchema.safeParse({ ...form.getValues()});
-      
-      if(!result.success){
-        console.log("validation failed");
-        return
-      }
-      const payLoad = result.data;
-      if(payLoad?._id){
-        updateMutation.mutate({ id :payLoad._id, body : payLoad});
-      }else{
-        createMutation.mutate(payLoad);
-      }
-    } catch (error) {
-      console.error("Error submitting form:", error);
-    } finally {
-      setIsLoading(false); // Reset loading state
-      setIsDialogOpen(false)
+    const payLoad = result.data;
+    setIsLoading(true)
+    if (payLoad?._id) {
+      const body = { courseId: payLoad.courseId, name: payLoad.name };
+      updateMutation.mutate({ id: payLoad._id, body: body }, {
+        onSuccess: () => {
+          toast.success("Course updated.")
+          setIsLoading(false);
+          setIsDialogOpen(false)
+        },
+        onError: (error: any) => {
+          console.log("error", error);
+          const msg = error?.response?.data?.message?.message ?? 'Something went wrong'
+          toast.error(msg)
+          setIsLoading(false)
+        }
+      });
+    } else {
+      createMutation.mutate(payLoad, {
+        onSuccess: () => {
+          toast.success("Course added.")
+          setIsLoading(false);
+          setIsDialogOpen(false)
+        },
+        onError: (error: any) => {
+          const msg = error?.response?.data?.message?.message ?? 'Something went wrong'
+          toast.error(msg)
+          setIsLoading(false)
+        }
+      });
     }
   }
 
-  const onEdit = async(raw : Course)=> {
+  const onEdit = async (raw: Course) => {
     setIsDialogOpen(true);
     const { courseId, name, _id } = raw;
-    form.setValue('name',name);
+    form.setValue('name', name);
     form.setValue('courseId', courseId);
     form.setValue('_id', _id);
   }
-  
-  const onDelete = async(raw : Course)=> {    
-      deleteMutation.mutate({ id: raw._id })
-      setIsDialogOpen(false)
-  }
-  
-  if (isPending) return 'Loading...'
 
-  return ( 
-     
+  const onDelete = async (raw: Course) => {
+    deleteMutation.mutate({ id: raw._id }, {
+      onSuccess: () => {
+        toast.success("Course added.")
+        setIsLoading(false);
+        setIsDialogOpen(false)
+      },
+      onError: (error: any) => {
+        const msg = error?.response?.data?.message?.message ?? 'Something went wrong'
+        toast.error(msg)
+        setIsLoading(false)
+        setIsDialogOpen(false)
+      }
+    })
+
+  }
+
+  if (isPending) {
+    return (
+      <div className="items-center justify-center">
+        Loading...
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="flex-col items-center justify-center gap-8">
+        <p className="text-2xl">Error fetching courses</p>
+      </div>
+    );
+  }
+
+  return (
+
     <div className="w-full">
-       
-      <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}> 
+
+      <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <div className="flex justify-end my-2">
           <AlertDialogTrigger asChild className="">
-            <Button variant="outline" onClick={() => setIsDialogOpen(true)}>
+            <Button variant="outline" onClick={() => {
+              setIsDialogOpen(true)
+              form.reset();
+            }
+            }>
               New
             </Button>
           </AlertDialogTrigger>
-       </div>
+        </div>
         <AlertDialogContent>
-            <AlertDialogHeader>
-             <AlertDialogTitle>Student form</AlertDialogTitle>
-            </AlertDialogHeader>
-            <AlertDialogDescription>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Student form</AlertDialogTitle>
+          </AlertDialogHeader>
+          <AlertDialogDescription>
             Please fill out the form below to continue.
           </AlertDialogDescription>
-            <div className="text-muted-foreground text-sm">
+          <div className="text-muted-foreground text-sm">
             <Form {...form}>
               <form onSubmit={(e) => {
-                  e.preventDefault(); // Prevent default form submission
-                  onSubmit();
-                }} 
+                e.preventDefault(); // Prevent default form submission
+                onSubmit();
+              }}
                 className="space-y-8">
                 <FormField
                   control={form.control}
@@ -219,49 +266,49 @@ export function Courses() {
                     <FormItem>
                       <FormLabel>Course Id</FormLabel>
                       <FormControl>
-                        <Input 
+                        <Input
                           placeholder="Course Id"
                           type="number"
-                           {...field}
-                            value={field.value || "" }
-                            onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : "")} // Convert to number
-                            />
+                          {...field}
+                          value={field.value || ""}
+                          onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : "")} // Convert to number
+                        />
                       </FormControl>
-                      <FormMessage/>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
 
-              <FormField
+                <FormField
                   control={form.control}
                   name="name"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="Name"  {...field} value={field.value || "" } />
-                      </FormControl> 
+                        <Input placeholder="Name"  {...field} value={field.value || ""} />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-               <AlertDialogFooter>   
-                <AlertDialogCancel type="button">Cancel</AlertDialogCancel>
-                <Button
+                <AlertDialogFooter>
+                  <AlertDialogCancel type="button">Cancel</AlertDialogCancel>
+                  <Button
                     type="button"
                     onClick={onSubmit}
                     disabled={isLoading} // Disable button while loading
                   >
                     {isLoading ? "Loading..." : "Continue"}
                   </Button>
-                  
-              </AlertDialogFooter>
+
+                </AlertDialogFooter>
               </form>
             </Form>
           </div>
         </AlertDialogContent>
       </AlertDialog>
-     
+
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -273,9 +320,9 @@ export function Courses() {
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
                     </TableHead>
                   )
                 })}
@@ -333,7 +380,7 @@ export function Courses() {
           </Button>
         </div>
       </div>
-   
+
     </div>
   )
 }

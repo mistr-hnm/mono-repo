@@ -35,8 +35,7 @@ export class CoursesService {
             data: {
                 _id: savedCourse._id.toString(),
                 courseId: savedCourse.courseId,
-                name: savedCourse.name,
-                description: savedCourse.description,
+                name: savedCourse.name
             }
         };
 
@@ -48,20 +47,24 @@ export class CoursesService {
 
         if (!courses || courses.length === 0) {
             throw new NotFoundException("No Course exists.");
-        }
+        } 
 
+        const filteredCourse = courses.map((course: Course) => { 
+            return {
+                _id: course._id.toString(),
+                name : course.name,
+                createdAt : course.createdAt.toDateString(), 
+                courseId : course.courseId                
+            }
+        })
+ 
         return {
             status: true,
             message: "Courses fetched successfully",
-            data: courses.map(course => ({
-                _id: course._id.toString(),
-                courseId: course.courseId,
-                name: course.name,
-                description: course.description,
-            }))
+            data: filteredCourse
         };
-
     }
+
 
     async findById(id: string): Promise<GetCourseResponseDto> {
 
@@ -77,14 +80,13 @@ export class CoursesService {
             data: {
                 _id: course._id.toString(),
                 courseId: course.courseId,
-                name: course.name,
-                description: course.description,
+                name: course.name, 
+                createdAt: course.createdAt.toDateString(),
             }
         };
     }
 
     async update(id: string, updateCourseDto: UpdateCourseDto): Promise<UpdateCourseResponseDto> {
-
         if (updateCourseDto.courseId) {
             const existingCourseWithId = await this.courseModel.findOne({ courseId: updateCourseDto.courseId, _id: { $ne: id } }).exec();
             if (existingCourseWithId) {
@@ -104,8 +106,7 @@ export class CoursesService {
             data: {
                 _id: updatedCourse._id.toString(),
                 courseId: updatedCourse.courseId,
-                name: updatedCourse.name,
-                description: updatedCourse.description,
+                name: updatedCourse.name
             }
         };
 
@@ -121,7 +122,7 @@ export class CoursesService {
 
         return {
             status: true,
-            message: `Course with ID "${id}" deleted successfully.`
+            message: 'Course deleted successfully.'
         };
 
     }

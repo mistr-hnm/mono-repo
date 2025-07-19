@@ -9,7 +9,6 @@ import { PermissionService } from '../permission/permission.service';
 import { CacheService } from '../../shared/cache/cache.service';
 import { CreateUserDto, CreateUserResponseDto, DeleteUserResponseDto, GetUserResponseDto, GetUsersResponseDto, LoginUserDto, LoginUserResponseDto, UpdateUserDto, UpdateUserResponseDto } from './schemas/user.dto';
 
-
 @Injectable()
 export class UserService {
 
@@ -24,7 +23,7 @@ export class UserService {
     async login(loginUserDto: LoginUserDto): Promise<LoginUserResponseDto | null> {
         const userData = await this.userModel.findOne({ email: loginUserDto.email }).select(["_id", "password"]);
         if (!userData) {
-            throw new BadRequestException("Email not registered. Please register first.")
+            throw new NotFoundException("User not found. Please register first.")
         }
 
         const isMatch = await bcrypt.compare(loginUserDto.password, userData.password);
@@ -69,7 +68,6 @@ export class UserService {
                 description: newUser.description,
             }
         };
-
     }
 
     async findAll(): Promise<GetUsersResponseDto> {

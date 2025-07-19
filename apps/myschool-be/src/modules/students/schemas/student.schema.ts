@@ -5,7 +5,7 @@ import { BaseSchema } from 'src/core/meta/base.schema';
 import { Course } from 'src/modules/courses/schemas/course.schema';
 
 
-@Schema()
+@Schema({ timestamps : true })
 export class Student extends BaseSchema {
 
     @Prop({required : true})

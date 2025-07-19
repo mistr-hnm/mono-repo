@@ -9,8 +9,6 @@ export function useCreateMutation() {
   return useMutation({
     mutationFn : async (body :  any) => {
         const response = await axiosInstance.post(`${url}/courses`, body)
-        
-        if(response.status !== 200 ) throw await response.data; 
         return response.data.data;
      },
      onSuccess :() => {
@@ -26,7 +24,7 @@ export function useUpdateMutation() {
     mutationFn : async ({id , body} : {id: string, body : any}) => {
         const response = await axiosInstance.put(`${url}/courses/${id}`, body);
         
-        if(response.status !== 200 ) throw await response.data; 
+        if(response.status !== 200 ) throw response.data; 
         return response.data.data;
      },
      onSuccess :() => {

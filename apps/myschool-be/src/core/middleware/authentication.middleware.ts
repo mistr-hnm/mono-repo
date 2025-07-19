@@ -1,7 +1,6 @@
-import { Injectable, NestMiddleware } from "@nestjs/common"
-import { JwtService } from "@nestjs/jwt"
+import { ForbiddenException, Injectable, NestMiddleware, NotFoundException, UnauthorizedException } from "@nestjs/common"
+import { JsonWebTokenError, JwtService, TokenExpiredError } from "@nestjs/jwt"
 import { Request, Response, NextFunction } from 'express'
-import { ForbiddenException, NotFoundException, UnauthorizedException } from "src/lib/response-exceptions";
 import { CacheService } from "src/shared/cache/cache.service";
 
 @Injectable()
@@ -15,9 +14,9 @@ export class AuthenticationMiddleware implements NestMiddleware {
 
     async use(req: Request, res: Response, next: NextFunction) {
         if (!req.headers['myschool-signature'] || req.headers['myschool-signature'] != process.env.API_KEY) {
-            throw new UnauthorizedException("Signature invalid");
+            throw new UnauthorizedException("Signature invalid")
         }
-        const { ip, method, originalUrl } = req;
+        const { ip, method, originalUrl } = req
 
         const allowedURLS = [
             "/api/v1/users/login",
@@ -29,22 +28,32 @@ export class AuthenticationMiddleware implements NestMiddleware {
             const authHeader = req.headers['authorization']
 
             if (!authHeader || !authHeader.toLowerCase().startsWith('bearer ')) {
-                throw new UnauthorizedException();
+                throw new UnauthorizedException()
             }
             const token = authHeader.split(' ')[1]
+            let decoded
+            try{
+               decoded = await this.jwtService.verifyAsync(token)
+            }catch(error){
+                if(error instanceof TokenExpiredError){
+                    throw new UnauthorizedException('Authentication token expired')
+                }else if(error instanceof JsonWebTokenError){
+                    throw new UnauthorizedException('Invalid authentication token')
+                }
+                throw new UnauthorizedException('Failed to authenticate token')
+            }
 
-            const decoded = await this.jwtService.verifyAsync(token)
-
-            const cachedPermissions = await this.cacheService.getFromCache('permission') as string;
-            const module = originalUrl.split("/");
-            const permissions = JSON.parse(cachedPermissions);
+            const cachedPermissions = await this.cacheService.getFromCache('permission') as string
             if (!cachedPermissions) {
-                throw new NotFoundException("Data not found");
+                throw new NotFoundException("Data not found")
             }
+            const module = originalUrl.split("/")
+            const permissions = JSON.parse(cachedPermissions)
+            
             if (permissions.findIndex((element) => element.module == module[3]) < 0) {
-                throw new ForbiddenException("Permission not allowed");
+                throw new ForbiddenException("Permission not allowed")
             }
-            req['user'] = decoded.sub;
+            req['user'] = decoded.sub
             next()
 
         }

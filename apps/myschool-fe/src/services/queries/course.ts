@@ -7,11 +7,10 @@ export function useGetCourses() {
     return useQuery({
         queryKey : ["courses"],
         queryFn : async () => {
-           const response = await axiosInstance.get(`${url}/courses`)
-      
-           if(response.status !== 200 ) throw await response.data; 
+           const response = await axiosInstance.get(`${url}/courses`)      
            return response.data.data;
         }
+        // @todo error handling
     })
 }
   

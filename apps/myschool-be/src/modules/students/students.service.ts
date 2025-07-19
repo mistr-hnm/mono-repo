@@ -54,7 +54,7 @@ export class StudentsService {
                     description: (populatedStudent.enrollmentCourse as Course).description
                 },
                 description: populatedStudent.description,
-                picture: populatedStudent.picture,
+                picture: populatedStudent.picture 
             }
         };
 
@@ -92,6 +92,7 @@ export class StudentsService {
                 },
                 description: student.description,
                 picture: student.picture,
+                createdAt: student.createdAt.toDateString()
             }))
         }
     }
@@ -123,6 +124,7 @@ export class StudentsService {
                 },
                 description: student.description,
                 picture: student.picture,
+                createdAt: student.createdAt.toDateString()
             }
         };
 
@@ -152,7 +154,7 @@ export class StudentsService {
             .exec();
 
         if (!updatedStudent) {
-            throw new BadRequestException(`Student with ID "${id}" not found for update.`);
+            throw new BadRequestException(`Student not found for update.`);
         }
 
         return {
@@ -179,11 +181,11 @@ export class StudentsService {
         const deletedStudent = await this.studentModel.findByIdAndDelete(id).exec();
 
         if (!deletedStudent) {
-            throw new NotFoundException(`Student with ID "${id}" not found for update.`);
+            throw new NotFoundException(`Student not found.`);
         }
         return {
             status: true,
-            message: `Student with ID "${id}" deleted successfully.`
+            message: `Student deleted successfully.`
         };
     }
 }

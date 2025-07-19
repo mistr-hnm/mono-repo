@@ -6,10 +6,16 @@ export enum Status {
 }
 
 
-@Schema({ timestamps : true})
+@Schema()
 export class BaseSchema {
 
     @Prop({type : String, enum : Status, default : Status.ACTIVE })
     status: Status;
+
+    @Prop()
+    createdAt : Date;
+    
+    @Prop()
+    updatedAt : Date;
 
 }

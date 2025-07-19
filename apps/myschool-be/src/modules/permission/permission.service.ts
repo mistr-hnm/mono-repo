@@ -105,7 +105,7 @@ export class PermissionService {
         const updatedPermission = await this.permissionModel.findByIdAndUpdate(id, updatePermissionDto, { new: true }).exec();
 
         if (!updatedPermission) {
-            throw new NotFoundException(`Permission with ID "${id}" not found for update.`);
+            throw new NotFoundException(`Permission not found for update.`);
         }
 
         return {
@@ -125,12 +125,12 @@ export class PermissionService {
         const deletedPermission = await this.permissionModel.findByIdAndDelete(id).exec();
 
         if (!deletedPermission) {
-            throw new NotFoundException(`Permission with ID "${id}" not found for deletion.`);
+            throw new NotFoundException(`Permission not found for deletion.`);
         }
 
         return {
             status: true,
-            message: `Permission with ID "${id}" deleted successfully.`
+            message: `Permission deleted successfully.`
         };
     }
 }

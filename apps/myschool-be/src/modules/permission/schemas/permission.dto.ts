@@ -7,28 +7,59 @@ export class CreatePermissionDto {
     @IsNotEmpty()
     readonly module: string;
 
-    @ApiProperty({ example: ["read", "write", "delete"], description: "An array of permission actions within the module (e.g., 'read', 'write', 'update', 'delete')", isArray: true, type: String })
+    @ApiProperty({ example: ["r", "w", "d"], description: "An array of permission actions within the module (e.g., 'read', 'write', 'update', 'delete')", isArray: true, type: String })
     @IsArray()
     @IsString({ each: true }) 
     @IsNotEmpty({ each: true })
     @ArrayUnique() 
     readonly permission: string[];
 
-    @ApiProperty({ example: "Allows managing user accounts.", description: "A brief description of this permission set", required: false })
+    @ApiProperty({ example: "Allows managing user accounts.", description: "A brief description of this permission set" , required : false })
     @IsString()
     @IsOptional()
     readonly description?: string;
 }
  
+
+export class PermissionDto {
+
+    @ApiProperty({ example: "sdsr343redf3434rgfd454", description: "The unique identifier of permission" })
+    @IsString()
+    @IsNotEmpty()
+    readonly _id: string;
+
+
+    @ApiProperty({ example: "users", description: "The module to which this permission applies (e.g., 'users', 'products', 'settings')" })
+    @IsString()
+    @IsNotEmpty()
+    readonly module: string;
+
+    @ApiProperty({ example: ["r", "w", "d"], description: "An array of permission actions within the module (e.g., 'read', 'write', 'update', 'delete')", isArray: true, type: String })
+    @IsArray()
+    @IsString({ each: true }) 
+    @IsNotEmpty({ each: true })
+    @ArrayUnique() 
+    readonly permission: string[];
+
+    @ApiProperty({ example: "Allows managing user accounts.", description: "A brief description of this permission set" , required : false })
+    @IsString()
+    @IsOptional()
+    readonly description?: string;
+}
+
 export class CreatePermissionResponseDto {
     @ApiProperty({ example: true, description: 'Indicates if the permission creation was successful' })
     status: boolean;
 
+    @ApiProperty({ example: 'Permission created', description: 'A message detailing the outcome (optional, present if success is false)'  })
+    message: string;
+
     @ApiProperty({
+        type : [PermissionDto],
         example: {
             _id: '60c72b2f9b1e8b0015b0e4d7',
             module: 'users',
-            permission: ['read', 'write', 'delete'],
+            permission: ['r', 'w', 'd'],
             description: 'Allows managing user accounts.', 
         },
         description: 'The created permission data object',
@@ -39,23 +70,18 @@ export class CreatePermissionResponseDto {
         permission: string[];
         description?: string; 
     };
-    @ApiProperty({ example: 'Permission created', description: 'A message detailing the outcome (optional, present if success is false)'  })
-    message: string;
+    
 }
  
 export class UpdatePermissionDto {
-    @ApiProperty({ example: "60c72b2f9b1e8b0015b0e4d7", description: "The unique identifier of the permission set to update" })
-    @IsString()
-    @IsNotEmpty()
-    @IsMongoId() // Assuming 'id' is the MongoDB ObjectId string
-    readonly id: string;
+    
 
-    @ApiProperty({ example: "products", description: "The updated module name", required: false })
+    @ApiProperty({ example: "products", description: "The updated module name" })
     @IsString()
     @IsOptional()
     readonly module?: string;
 
-    @ApiProperty({ example: ["view", "edit"], description: "The updated array of permission actions", required: false, isArray: true, type: String })
+    @ApiProperty({ example: ["r", "w"], description: "The updated array of permission actions", isArray: true, type: String })
     @IsArray()
     @IsString({ each: true })
     @IsNotEmpty({ each: true })
@@ -63,7 +89,7 @@ export class UpdatePermissionDto {
     @IsOptional()
     readonly permission?: string[];
 
-    @ApiProperty({ example: "Allows viewing and editing product details.", description: "The updated description of this permission set", required: false })
+    @ApiProperty({ example: "Allows viewing and editing product details.", description: "The updated description of this permission set" , required : false })
     @IsString()
     @IsOptional()
     readonly description?: string;
@@ -73,11 +99,15 @@ export class UpdatePermissionResponseDto {
     @ApiProperty({ example: true, description: 'Indicates if the permission update was successful' })
     status: boolean;
 
+    @ApiProperty({ example: 'Permission not found', description: 'A message detailing the outcome (optional, present if success is false)'  })
+    message: string;
+
     @ApiProperty({
+        type : [PermissionDto],
         example: {
             _id: '60c72b2f9b1e8b0015b0e4d7',
             module: 'products',
-            permission: ['view', 'edit'],
+            permission: ['r', 'w'],
             description: 'Allows viewing and editing product details.', 
         },
         description: 'The updated permission data object',
@@ -88,9 +118,6 @@ export class UpdatePermissionResponseDto {
         permission: string[];
         description?: string; 
     };
-
-    @ApiProperty({ example: 'Permission not found', description: 'A message detailing the outcome (optional, present if success is false)'  })
-    message: string;
 }
  
 export class GetPermissionByIdDto {
@@ -105,11 +132,15 @@ export class GetPermissionResponseDto {
     @ApiProperty({ example: true, description: 'Indicates if the operation was successful' })
     status: boolean;
 
+    @ApiProperty({ example: 'Permission not found', description: 'A message detailing the outcome (optional, present if success is false)'  })
+    message: string;
+
     @ApiProperty({
+        type : [PermissionDto],
         example: {
             _id: '60c72b2f9b1e8b0015b0e4d7',
             module: 'users',
-            permission: ['read', 'write', 'delete'],
+            permission: ['r', 'w', 'd'],
             description: 'Allows managing user accounts.', 
         },
         description: 'The permission data object (optional, present if success is true)',
@@ -122,18 +153,16 @@ export class GetPermissionResponseDto {
         description?: string; 
     };
 
-    @ApiProperty({ example: 'Permission not found', description: 'A message detailing the outcome (optional, present if success is false)'  })
-    message: string;
 }
  
 export class GetAllPermissionsDto {
-    @ApiProperty({ example: 10, description: "The number of permission sets to retrieve per page", required: false })
+    @ApiProperty({ example: 10, description: "The number of permission sets to retrieve per page" })
     @IsOptional()
     @IsNumber()
     @Min(1)
     readonly limit?: number;
 
-    @ApiProperty({ example: 0, description: "The offset for pagination", required: false })
+    @ApiProperty({ example: 0, description: "The offset for pagination" })
     @IsOptional()
     @IsNumber()
     @Min(0)
@@ -144,19 +173,22 @@ export class GetPermissionsResponseDto {
     @ApiProperty({ example: true, description: 'Indicates if the operation was successful' })
     status: boolean;
 
+    @ApiProperty({ example: 'No permissions found', description: 'A message detailing the outcome (optional, present if success is false)'  })
+    message: string;
+
     @ApiProperty({
-        type: [GetPermissionResponseDto], // Array of single permission response DTOs
+        type : [PermissionDto],
         example: [
             {
                 _id: '60c72b2f9b1e8b0015b0e4d7',
-                module: 'users',
-                permission: ['read', 'write', 'delete'],
+                module: 'courses',
+                permission: ['r', 'w', 'd'],
                 description: 'Allows managing user accounts.', 
             },
             {
                 _id: '60c72b2f9b1e8b0015b0e4d8',
-                module: 'products',
-                permission: ['view', 'edit'],
+                module: 'students',
+                permission: ['r', 'd'],
                 description: 'Allows viewing and editing product details.', 
             },
         ],
@@ -168,9 +200,6 @@ export class GetPermissionsResponseDto {
         permission: string[];
         description?: string; 
     }[];
-
-    @ApiProperty({ example: 'No permissions found', description: 'A message detailing the outcome (optional, present if success is false)'  })
-    message: string;
 }
  
 export class DeletePermissionDto {

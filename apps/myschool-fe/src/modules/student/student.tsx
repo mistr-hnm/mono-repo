@@ -38,7 +38,7 @@ import { Input } from "@/components/ui/input"
 
 import * as z from 'zod/v4'
 
-import { zodResolver } from "@hookform/resolvers/zod"
+import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
 import { Calendar } from "@/components/ui/calendar"
@@ -49,6 +49,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useGetStudents } from "@/services/queries/student"
 import { useGetCourses } from "@/services/queries/course"
 import { useCreateMutation, useDeleteMutation, useUpdateMutation } from "@/services/mutation/student"
+import { toast } from "sonner"
 
 export function StudentTable() {
  
@@ -61,18 +62,19 @@ export function StudentTable() {
   const [rowSelection, setRowSelection] = useState({})
 
 
-  const { data : studentData } = useGetStudents();
+  const { data : studentData, isPending, isError } = useGetStudents()
   const { data : courseData } = useGetCourses();
 
-  const createMutation = useCreateMutation();
-  const updateMutation = useUpdateMutation();
-  const deleteMutation = useDeleteMutation();
+  const createMutation = useCreateMutation()
+  const updateMutation = useUpdateMutation()
+  const deleteMutation = useDeleteMutation()
 
+  
 
   const formSchema = z.object({
     _id: z.string().optional(),
-    enrollmentNumber: z.number(),
-    fullname: z.string(),
+    enrollmentNumber: z.number().min(1, "Please enter number"),
+    fullname: z.string().min(1, "Please enter name"),
     dateofbirth: z.date(),
     enrollmentCourse: z.string(),
     picture: z.any(),
@@ -80,7 +82,7 @@ export function StudentTable() {
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+    resolver: standardSchemaResolver(formSchema),
     defaultValues: {
       enrollmentNumber: 0,
       fullname: "",
@@ -232,46 +234,93 @@ export function StudentTable() {
     
     try {
       const model = { ...form.getValues() }
-      model["dateofbirth"] = new Date(model.dateofbirth) 
-      const result = formSchema.safeParse({ ...model }) 
-      if (!result.success) { 
-        alert("Validation failed");
+      model["dateofbirth"] = new Date(model.dateofbirth)
+      const result = formSchema.safeParse({ ...model })
+      if (!result.success) {
+        toast.error("Validation failed.")
         return
       }
-       
-      const payLoad = result.data; 
+ 
+      const payLoad = result.data;
       if (payLoad?._id) {
-        updateMutation.mutate({id : payLoad._id, body : payLoad})
+        const { _id , ...bodyToUpdate } = payLoad
+        updateMutation.mutate({id : _id, body : bodyToUpdate}, {
+          onSuccess: () => {
+            toast.success("Student updated.")
+            setIsDialogOpen(false)
+          },
+          onError: (error: any) => {
+            console.log("error", error);
+            const msg = error?.response?.data?.message?.message ?? 'Something went wrong'
+            toast.error(msg)
+          }
+        })
       } else {
-        createMutation.mutate(payLoad)
+        createMutation.mutate(payLoad, {
+          onSuccess: () => {
+            toast.success("Student added.")
+            setIsDialogOpen(false)
+          },
+          onError: (error: any) => {
+            const msg = error?.response?.data?.message?.message ?? 'Something went wrong'
+            toast.error(msg)
+          }
+        })
       }
     } catch (error) {
       console.error("Error submitting form:", error);
-    } finally { 
+    } finally {
       setIsDialogOpen(false)
     }
   }
 
   const onEdit = async (student: any) => {
-    setIsDialogOpen(true);
-    const { _id, enrollmentNumber, fullname, dateofbirth, enrollmentCourse, } = student;
-    form.setValue('enrollmentNumber', enrollmentNumber);
-    form.setValue('fullname', fullname);
-    form.setValue('_id', _id);
-    form.setValue('dateofbirth', dateofbirth);
-    form.setValue('enrollmentCourse', enrollmentCourse?._id);
+    setIsDialogOpen(true)
+    const { _id, enrollmentNumber, fullname, dateofbirth, enrollmentCourse, } = student
+    form.setValue('enrollmentNumber', enrollmentNumber)
+    form.setValue('fullname', fullname)
+    form.setValue('_id', _id)
+    form.setValue('dateofbirth', dateofbirth)
+    form.setValue('enrollmentCourse', enrollmentCourse?._id)
   }
 
   const onDelete = async (raw: Student) => { 
     try {
-      deleteMutation.mutate({id : raw._id})
+      deleteMutation.mutate({id : raw._id}, {
+        onSuccess: () => {
+          toast.success("Student added.")
+          setIsDialogOpen(false)
+        },
+        onError: (error: any) => {
+          const msg = error?.response?.data?.message?.message ?? 'Something went wrong'
+          toast.error(msg) 
+          setIsDialogOpen(false)
+        }
+      })
     } catch (error) {
-      console.error("Error submitting form:", error);
+      console.error("Error submitting form:", error)
     } finally { 
       setIsDialogOpen(false)
     }
   }
 
+
+  if (isPending) {
+    return (
+      <div className="items-center justify-center">
+        Loading...
+    </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="flex-col items-center justify-center gap-8">
+        <p className="text-2xl">Error fetching students</p>
+      </div>
+    );
+  }
+  
   return (
     <div className="w-full">
       <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
