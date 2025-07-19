@@ -35,7 +35,10 @@ async function bootstrap() {
     )
     .addSecurityRequirements('bearer')
     .setVersion('1.0')
-    .addTag('Myschool')
+    .addTag('User')
+    .addTag('Courses')
+    .addTag('Students')
+    .addTag('Permission')
     .build()
 
   let document = SwaggerModule.createDocument(app, config, {
