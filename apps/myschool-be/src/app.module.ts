@@ -14,6 +14,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { env } from './lib/env';
 import { PermissionModule } from './modules/permission/permission.module';
 import { SharedCacheModule } from './shared/cache/cache.module';
+import { FileModule } from './modules/file/file.module';
 
 @Module({
   imports: [
@@ -38,7 +39,8 @@ import { SharedCacheModule } from './shared/cache/cache.module';
     CoursesModule,
     StudentsModule,
     UserModule,
-    PermissionModule
+    PermissionModule,
+    FileModule
   ],
   controllers: [AppController],
   providers: [

@@ -17,7 +17,6 @@ import { SharedCacheModule } from 'src/shared/cache/cache.module';
     controllers: [UserController],
     providers: [
         UserService,
-        
     ]
 })
 export class UserModule {}
