@@ -37,18 +37,20 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from "@/components/ui/input" 
 
 import * as z from 'zod/v4'
-
+import { format } from "date-fns"
+import { CalendarIcon } from "lucide-react"
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { cn } from "@/lib/utils"
+import { FileUpload } from "@/components/ui/file-upload"
 import { Calendar } from "@/components/ui/calendar"
-import { CalendarIcon } from "lucide-react"
-import { format } from "date-fns"
+
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { cn } from "@/lib/utils"
 import { useGetStudents } from "@/services/queries/student"
 import { useGetCourses } from "@/services/queries/course"
 import { useCreateMutation, useDeleteMutation, useUpdateMutation } from "@/services/mutation/student"
+import type { FileUploadResponse } from "@/schema/file"
 import { toast } from "sonner"
 
 export function StudentTable() {
@@ -77,7 +79,7 @@ export function StudentTable() {
     fullname: z.string().min(1, "Please enter name"),
     dateofbirth: z.date(),
     enrollmentCourse: z.string(),
-    picture: z.any(),
+    picture: z.string(),
     description: z.string().optional()
   });
 
@@ -88,6 +90,7 @@ export function StudentTable() {
       fullname: "",
       dateofbirth: new Date(),
       enrollmentCourse: "",
+      picture: "",
       description: "",
     }
   });
@@ -218,14 +221,10 @@ export function StudentTable() {
     },
   })
 
-  const handleImageChange = (event : any) => {
-    const file = event.target.files?.[0]
-    if(file){
-      const reader = new FileReader()
-      reader.readAsDataURL(file);
-      reader.onloadend = () => {
-        form.setValue('picture', reader.result as string);
-      }
+  const onFileUpload = (event : FileUploadResponse) => {
+    if(event.status){
+      form.setValue('picture',event.data._id)
+      toast.success("File uploaded successfully")
     }
   }
 
@@ -240,8 +239,9 @@ export function StudentTable() {
         toast.error("Validation failed.")
         return
       }
- 
+
       const payLoad = result.data;
+       
       if (payLoad?._id) {
         const { _id , ...bodyToUpdate } = payLoad
         updateMutation.mutate({id : _id, body : bodyToUpdate}, {
@@ -282,13 +282,14 @@ export function StudentTable() {
     form.setValue('_id', _id)
     form.setValue('dateofbirth', dateofbirth)
     form.setValue('enrollmentCourse', enrollmentCourse?._id)
+    form.setValue('picture', "") // @todo
   }
 
   const onDelete = async (raw: Student) => { 
     try {
       deleteMutation.mutate({id : raw._id}, {
         onSuccess: () => {
-          toast.success("Student added.")
+          toast.success("Student deleted successfully.")
           setIsDialogOpen(false)
         },
         onError: (error: any) => {
@@ -305,21 +306,21 @@ export function StudentTable() {
   }
 
 
-  if (isPending) {
-    return (
-      <div className="items-center justify-center">
-        Loading...
-    </div>
-    );
-  }
+  // if (isPending) {
+  //   return (
+  //     <div className="items-center justify-center">
+  //       Loading...
+  //   </div>
+  //   );
+  // }
 
-  if (isError) {
-    return (
-      <div className="flex-col items-center justify-center gap-8">
-        <p className="text-2xl">Error fetching students</p>
-      </div>
-    );
-  }
+  // if (isError) {
+    // return (
+    //   <div className="flex-col items-center justify-center gap-8">
+    //     <p className="text-2xl">Error fetching students</p>
+    //   </div>
+    // );
+  // }
   
   return (
     <div className="w-full">
@@ -387,16 +388,11 @@ export function StudentTable() {
               <FormField
                   control={form.control}
                   name="picture"
-                  render={({ field : { value, onChange, ...fieldProps }}) => (
+                  render={({ field }) => (
                     <FormItem>
                       <FormLabel>Picture</FormLabel>
                       <FormControl>
-                        <Input
-                         {...fieldProps}
-                         type="file" 
-                         accept="image/*"
-                         onChange={handleImageChange}
-                        />
+                       <FileUpload onSuccess={onFileUpload}/>
                       </FormControl>
                       <FormMessage />
                     </FormItem>

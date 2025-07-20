@@ -6,6 +6,7 @@ const url = `${import.meta.env.VITE_BE_BASE_URL}`;
 export function useGetStudents() {
     return useQuery({
         queryKey : ["students"],
+        retry : false,
         queryFn : async () => {
            const response = await axiosInstance.get(`${url}/students`)
            
@@ -14,4 +15,3 @@ export function useGetStudents() {
         }
     })
 }
-  

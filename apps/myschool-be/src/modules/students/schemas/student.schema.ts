@@ -19,13 +19,12 @@ export class Student extends BaseSchema {
 
     @Prop({type : mongoose.Schema.Types.ObjectId, ref: 'Course' })
     enrollmentCourse: Course;
-
-    @Prop()
-    description: string;
-
-    @Prop()
+    
+    @Prop({type : mongoose.Schema.Types.ObjectId, ref: 'File' })
     picture: string;
  
+    @Prop()
+    description: string;
 }
 
 
