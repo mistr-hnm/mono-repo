@@ -64,7 +64,8 @@ export class StudentsService {
         const { limit, offset } = getAllStudentsDto || {} //@todo
 
         const query = this.studentModel.find()
-            .populate('enrollmentCourse', ['_id', 'courseId', 'name', 'description']);
+            .populate('enrollmentCourse', ['_id', 'courseId', 'name', 'description'])
+            .populate('picture',['_id','url'])
 
         if (limit !== undefined && offset !== undefined) {
             query.limit(limit).skip(offset);
@@ -75,7 +76,8 @@ export class StudentsService {
         if (!students || students.length === 0) {
             throw new NotFoundException("Student not found.")
         }
-
+        
+        
         return {
             status: true,
             message: "Student fetched successfully",
@@ -91,7 +93,7 @@ export class StudentsService {
                     description: (student.enrollmentCourse as Course).description
                 },
                 description: student.description,
-                picture: student.picture,
+                picture: student?.picture, // @todo
                 createdAt: student.createdAt.toDateString()
             }))
         }

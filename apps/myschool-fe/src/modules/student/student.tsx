@@ -34,7 +34,7 @@ import { useState } from "react"
 
 import { useForm } from "react-hook-form"
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Input } from "@/components/ui/input" 
+import { Input } from "@/components/ui/input"
 
 import * as z from 'zod/v4'
 import { format } from "date-fns"
@@ -54,8 +54,8 @@ import type { FileUploadResponse } from "@/schema/file"
 import { toast } from "sonner"
 
 export function StudentTable() {
- 
-  const [isDialogOpen, setIsDialogOpen] = useState(false); 
+
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
 
   const [sorting, setSorting] = useState<SortingState>([])
@@ -64,21 +64,21 @@ export function StudentTable() {
   const [rowSelection, setRowSelection] = useState({})
 
 
-  const { data : studentData, isPending, isError } = useGetStudents()
-  const { data : courseData } = useGetCourses();
+  const { data: studentData, isPending } = useGetStudents()
+  const { data: courseData } = useGetCourses();
 
   const createMutation = useCreateMutation()
   const updateMutation = useUpdateMutation()
   const deleteMutation = useDeleteMutation()
 
-  
+
 
   const formSchema = z.object({
     _id: z.string().optional(),
     enrollmentNumber: z.number().min(1, "Please enter number"),
     fullname: z.string().min(1, "Please enter name"),
-    dateofbirth: z.date(),
-    enrollmentCourse: z.string(),
+    dateofbirth: z.date().refine((date) => date instanceof Date && !isNaN(date.getTime()), { message: "Please select a valid date of birth." }),
+    enrollmentCourse: z.string().min(1, "Please select course"),
     picture: z.string(),
     description: z.string().optional()
   });
@@ -99,17 +99,17 @@ export function StudentTable() {
 
   const columns: ColumnDef<Student>[] = [
     {
-     id: "picture",
-     enableHiding : true,
+      id: "picture",
+      enableHiding: true,
       cell: ({ row }) => {
-        const imageBase64 = row.original.picture;
-        return  <>
-        <div className="flex justify-center">
+        const picture: { _id: string, url: string } = row.original.picture as any;
+        return <>
+          <div className="flex justify-center">
             <Avatar className="">
-            <AvatarImage src={`${imageBase64}`}/>
+              <AvatarImage src={`${picture.url}`} />
               <AvatarFallback>CN</AvatarFallback>
             </Avatar>
-        </div>
+          </div>
         </>
       }
     },
@@ -221,16 +221,16 @@ export function StudentTable() {
     },
   })
 
-  const onFileUpload = (event : FileUploadResponse) => {
-    if(event.status){
-      form.setValue('picture',event.data._id)
+  const onFileUpload = (event: FileUploadResponse) => {
+    if (event.status) {
+      form.setValue('picture', event.data._id)
       toast.success("File uploaded successfully")
     }
   }
 
 
   const onSubmit = async () => {
-    
+
     try {
       const model = { ...form.getValues() }
       model["dateofbirth"] = new Date(model.dateofbirth)
@@ -241,10 +241,10 @@ export function StudentTable() {
       }
 
       const payLoad = result.data;
-       
+
       if (payLoad?._id) {
-        const { _id , ...bodyToUpdate } = payLoad
-        updateMutation.mutate({id : _id, body : bodyToUpdate}, {
+        const { _id, ...bodyToUpdate } = payLoad
+        updateMutation.mutate({ id: _id, body: bodyToUpdate }, {
           onSuccess: () => {
             toast.success("Student updated.")
             setIsDialogOpen(false)
@@ -274,7 +274,7 @@ export function StudentTable() {
     }
   }
 
-  const onEdit = async (student: any) => {
+  const onEdit = async (student: Student) => {
     setIsDialogOpen(true)
     const { _id, enrollmentNumber, fullname, dateofbirth, enrollmentCourse, } = student
     form.setValue('enrollmentNumber', enrollmentNumber)
@@ -282,57 +282,52 @@ export function StudentTable() {
     form.setValue('_id', _id)
     form.setValue('dateofbirth', dateofbirth)
     form.setValue('enrollmentCourse', enrollmentCourse?._id)
-    form.setValue('picture', "") // @todo
+    form.setValue('picture', student.picture?._id || "")
   }
 
-  const onDelete = async (raw: Student) => { 
+  const onDelete = async (raw: Student) => {
     try {
-      deleteMutation.mutate({id : raw._id}, {
+      deleteMutation.mutate({ id: raw._id }, {
         onSuccess: () => {
           toast.success("Student deleted successfully.")
           setIsDialogOpen(false)
         },
         onError: (error: any) => {
           const msg = error?.response?.data?.message?.message ?? 'Something went wrong'
-          toast.error(msg) 
+          toast.error(msg)
           setIsDialogOpen(false)
         }
       })
     } catch (error) {
       console.error("Error submitting form:", error)
-    } finally { 
+    } finally {
       setIsDialogOpen(false)
     }
   }
 
 
-  // if (isPending) {
-  //   return (
-  //     <div className="items-center justify-center">
-  //       Loading...
-  //   </div>
-  //   );
-  // }
+  if (isPending) {
+    return (
+      <div className="flex items-center justify-center h-48">
+        <p className="text-xl text-gray-600">Loading student data...</p>
+      </div>
+    );
+  }
 
-  // if (isError) {
-    // return (
-    //   <div className="flex-col items-center justify-center gap-8">
-    //     <p className="text-2xl">Error fetching students</p>
-    //   </div>
-    // );
-  // }
-  
+
+  const hasData = studentData && studentData.length > 0;
+  console.log("infinite loading..");
+
   return (
     <div className="w-full">
       <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <div className="flex justify-end my-2">
           <AlertDialogTrigger asChild className="">
-            <Button variant="outline" onClick={() => 
-              {
-                setIsDialogOpen(true);
-                form.reset();
-              }
-              }>
+            <Button variant="outline" onClick={() => {
+              setIsDialogOpen(true);
+              form.reset();
+            }
+            }>
               Insert
             </Button>
           </AlertDialogTrigger>
@@ -346,11 +341,7 @@ export function StudentTable() {
           </AlertDialogDescription>
           <div className="text-muted-foreground text-sm">
             <Form {...form}>
-              <form onSubmit={(e) => {
-                e.preventDefault(); // Prevent default form submission
-                onSubmit();
-              }}
-                className="space-y-8">
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                 <FormField
                   control={form.control}
                   name="enrollmentNumber"
@@ -385,14 +376,14 @@ export function StudentTable() {
                   )}
                 />
 
-              <FormField
+                <FormField
                   control={form.control}
                   name="picture"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Picture</FormLabel>
                       <FormControl>
-                       <FileUpload onSuccess={onFileUpload}/>
+                        <FileUpload onSuccess={onFileUpload} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -467,14 +458,9 @@ export function StudentTable() {
 
                 <AlertDialogFooter>
                   <AlertDialogCancel type="button">Cancel</AlertDialogCancel>
-                  <Button
-                    type="button"
-                    onClick={onSubmit}
-                    disabled={createMutation.isPending} // Disable button while loading
-                  >
-                    {createMutation.isPending ? "Loading..." : "Continue"}
+                  <Button type="submit" disabled={createMutation.isPending}>
+                    {createMutation.isPending ? "Loading..." : "Submit"}
                   </Button>
-
                 </AlertDialogFooter>
               </form>
             </Form>
@@ -503,7 +489,7 @@ export function StudentTable() {
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
+            {hasData ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow key={row.id}>
                   {row.getVisibleCells().map((cell) => (
@@ -529,32 +515,35 @@ export function StudentTable() {
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <div className="text-muted-foreground flex-1 text-sm">
-          {table.getFilteredSelectedRowModel().rows.length} of{" "}
-          {table.getFilteredRowModel().rows.length} row(s) selected.
-        </div>
-        <div className="space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            Previous
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          >
-            Next
-          </Button>
-        </div>
-      </div>
+      {hasData
+        ?
+        <div className="flex items-center justify-end space-x-2 py-4">
+          <div className="text-muted-foreground flex-1 text-sm">
+            {table.getFilteredSelectedRowModel().rows.length} of{" "}
+            {table.getFilteredRowModel().rows.length} row(s) selected.
+          </div>
+          <div className="space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+            >
+              Previous
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+            >
+              Next
+            </Button>
+          </div>
+        </div> : null}
     </div>
   )
+
 }
 
 export type Student = {
@@ -562,8 +551,8 @@ export type Student = {
   enrollmentNumber: number
   fullname: string
   dateofbirth: Date
-  enrollmentCourse: string  
-  picture: string
+  enrollmentCourse: { _id: string, courseId: number, name: string }
+  picture: { _id: string, url: string }
   description: string
   status?: string
   createdAt: Date

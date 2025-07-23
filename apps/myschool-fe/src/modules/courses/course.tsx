@@ -215,19 +215,13 @@ export function Courses() {
 
   if (isPending) {
     return (
-      <div className="items-center justify-center">
-        Loading...
+      <div className="flex items-center justify-center h-48">
+        <p className="text-xl text-gray-600">Loading Course data...</p>
       </div>
     );
   }
 
-  if (isError) {
-    return (
-      <div className="flex-col items-center justify-center gap-8">
-        <p className="text-2xl">Error fetching courses</p>
-      </div>
-    );
-  }
+ 
 
   return (
 
@@ -247,18 +241,14 @@ export function Courses() {
         </div>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Student form</AlertDialogTitle>
+            <AlertDialogTitle>Course form</AlertDialogTitle>
           </AlertDialogHeader>
           <AlertDialogDescription>
             Please fill out the form below to continue.
           </AlertDialogDescription>
           <div className="text-muted-foreground text-sm">
             <Form {...form}>
-              <form onSubmit={(e) => {
-                e.preventDefault(); // Prevent default form submission
-                onSubmit();
-              }}
-                className="space-y-8">
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                 <FormField
                   control={form.control}
                   name="courseId"
@@ -278,7 +268,6 @@ export function Courses() {
                     </FormItem>
                   )}
                 />
-
                 <FormField
                   control={form.control}
                   name="name"
@@ -294,12 +283,8 @@ export function Courses() {
                 />
                 <AlertDialogFooter>
                   <AlertDialogCancel type="button">Cancel</AlertDialogCancel>
-                  <Button
-                    type="button"
-                    onClick={onSubmit}
-                    disabled={isLoading} // Disable button while loading
-                  >
-                    {isLoading ? "Loading..." : "Continue"}
+                  <Button type="submit" disabled={isLoading}>
+                    {isLoading ? "Loading..." : "Submit"}
                   </Button>
 
                 </AlertDialogFooter>

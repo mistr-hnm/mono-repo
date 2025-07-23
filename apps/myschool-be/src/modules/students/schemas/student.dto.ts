@@ -101,7 +101,7 @@ export class CreateStudentResponseDto {
     @ApiProperty({ example: 'Student added successfully', description: 'A message detailing the outcome (optional, present if success is false)' })
     message: string;
 
-    @ApiProperty({
+    @ApiProperty({ 
         type : [StudentDto],
         example: {
             _id: '60c72b2f9b1e8b0015b0e4d7',
