@@ -379,7 +379,7 @@ export function StudentTable() {
                 <FormField
                   control={form.control}
                   name="picture"
-                  render={({ field }) => (
+                  render={() => (
                     <FormItem>
                       <FormLabel>Picture</FormLabel>
                       <FormControl>

@@ -68,7 +68,7 @@ export function Courses() {
     }
   })
 
-  const { isError, isPending, data } = useGetCourses();
+  const { isPending, data } = useGetCourses();
   const createMutation = useCreateMutation();
   const updateMutation = useUpdateMutation();
   const deleteMutation = useDeleteMutation();
