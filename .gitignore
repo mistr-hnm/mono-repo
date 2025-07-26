@@ -42,3 +42,15 @@ Thumbs.db
 .nx/workspace-data
 .cursor/rules/nx-rules.mdc
 .github/instructions/nx.instructions.md
+
+
+# dotenv environment variable files
+.env
+.env.docker
+.env.prod
+.env.production
+.env.development.local
+.env.test.local
+.env.production.local
+.env.local
+

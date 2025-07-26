@@ -1,0 +1,53 @@
+services:
+  mongodb:
+    image: mongo
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - myschool-net
+
+  redis:
+    image: redis/redis-stack:latest
+    container_name: redis-stack
+    ports:
+      - "6379:6379"
+      - "8001:8001"
+    networks:
+      - myschool-net
+    
+  myschool-be:
+    build:
+      context: .
+      dockerfile: ./apps/myschool-be/Dockerfile
+      target: prod-be
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./apps/myschool-be/.env
+    networks:
+      - myschool-net
+    depends_on:
+      - mongodb
+      - redis
+
+  myschool-fe:
+    build:
+      context: .
+      dockerfile: ./apps/myschool-fe/Dockerfile
+      target: prod-fe
+      args:
+        VITE_BE_BASE_URL: "http://localhost:3000/api/v1"
+        VITE_API_KEY: "AUTHENTICATION"
+    ports:
+      - "3001:80"
+    networks:
+      - myschool-net
+
+volumes:
+  mongodb_data:
+
+networks:
+  myschool-net:
