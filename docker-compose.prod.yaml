@@ -3,6 +3,8 @@ services:
     image: ghcr.io/mistr-hnm/myschool-be:latest
     env_file:
       - ./apps/myschool-be/.env.production
+    ports:
+      - "3000:3000"
   myschool-fe:
     image: ghcr.io/mistr-hnm/myschool-fe:latest
     env_file:
