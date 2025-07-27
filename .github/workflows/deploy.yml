@@ -75,12 +75,10 @@ jobs:
           ssh-private-key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
       
       - name: Create Git commit hash
-        run: |
-          export GIT_COMMIT_HASH=${{ github.sha }}
+        run: export GIT_COMMIT_HASH=${{ github.sha }}
 
       - name: Add SSH host key
-        run: |
-          ssh-keygen -H myschool.devhnm.xyz >> ~/.ssh/known_hosts
+        run: ssh-keyscan -H myschool.devhnm.xyz >> ~/.ssh/known_hosts
 
       - name: Copy files to server
         run: |
