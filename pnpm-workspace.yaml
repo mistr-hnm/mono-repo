@@ -3,4 +3,7 @@ packages:
   - "apps/*"
   # all common packages
   - "packages/*"
-  
+
+syncInjectedDepsAfterScripts:
+  - build
+injectWorkspacePackages: true

@@ -6,9 +6,9 @@ RUN corepack enable
 FROM base AS build
 WORKDIR /app
 COPY pnpm-lock.yaml pnpm-workspace.yaml ./
-RUN pnpm fetch
-RUN pnpm install -r --offline --prod
 ADD . .
+RUN pnpm fetch
+RUN pnpm install -r --offline
 RUN pnpm --filter myschool-be build
 RUN pnpm --filter myschool-be deploy --prod /prod/api
 
