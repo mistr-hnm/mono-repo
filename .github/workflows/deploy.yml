@@ -86,6 +86,7 @@ jobs:
           ssh ubuntu@myschool.devhnm.xyz "mkdir -p /home/ubuntu/apps/"
           scp -r apps/myschool-be ubuntu@myschool.devhnm.xyz:/home/ubuntu/apps/
           ssh ubuntu@myschool.devhnm.xyz "echo '${{ secrets.BE_APP_ENV_FILE }}' > /home/ubuntu/apps/myschool-be/.env.production"
+          ssh ubuntu@myschool.devhnm.xyz "echo '${{ secrets.FE_APP_ENV_FILE }}' > /home/ubuntu/apps/myschool-fe/.env.production"
       
       - name: Log in to Container Registry on server and deploy
         run: |
