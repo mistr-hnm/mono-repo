@@ -83,15 +83,11 @@ jobs:
       - name: Copy files to server
         run: |
           scp docker-compose.prod.yaml ubuntu@myschool.devhnm.xyz:/home/ubuntu/
-          ssh ubuntu@myschool.devhnm.xyz "mkdir -p /home/ubuntu/apps/"
-          scp -r apps/myschool-be ubuntu@myschool.devhnm.xyz:/home/ubuntu/apps/
-          ssh ubuntu@myschool.devhnm.xyz "echo '${{ secrets.BE_APP_ENV_FILE }}' > /home/ubuntu/apps/myschool-be/.env"
+          ssh ubuntu@myschool.devhnm.xyz "echo "${{ secrets.BE_APP_ENV_FILE }}" > /home/ubuntu/apps/myschool-be/.env"
       
       - name: Log in to Container Registry on server and deploy
         run: |
           ssh ubuntu@myschool.devhnm.xyz <<EOF
             echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
-            docker pull ghcr.io/mistr-hnm/myschool-be:latest
-            docker pull ghcr.io/mistr-hnm/myschool-fe:latest
             docker compose -f /home/ubuntu/docker-compose.prod.yaml up -d --remove-orphans
           EOF
