@@ -93,6 +93,9 @@ importers:
       class-validator:
         specifier: ^0.14.2
         version: 0.14.2
+      express:
+        specifier: ^5.1.0
+        version: 5.1.0
       mongoose:
         specifier: ^8.16.0
         version: 8.16.1
@@ -114,7 +117,7 @@ importers:
         version: 9.29.0
       '@myschool/schema':
         specifier: workspace:*
-        version: link:../../packages/schema
+        version: file:packages/schema
       '@nestjs/cli':
         specifier: ^11.0.0
         version: 11.0.7(@swc/cli@0.6.0(@swc/core@1.12.9(@swc/helpers@0.5.17))(chokidar@4.0.3))(@swc/core@1.12.9(@swc/helpers@0.5.17))(@types/node@22.16.0)
@@ -198,7 +201,7 @@ importers:
         version: 5.1.1(react-hook-form@7.59.0(react@19.1.0))
       '@myschool/schema':
         specifier: workspace:*
-        version: link:../../packages/schema
+        version: file:packages/schema
       '@radix-ui/react-alert-dialog':
         specifier: ^1.1.14
         version: 1.1.14(@types/react-dom@19.1.6(@types/react@19.1.8))(@types/react@19.1.8)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -1811,6 +1814,9 @@ packages:
 
   '@mongodb-js/saslprep@1.3.0':
     resolution: {integrity: sha512-zlayKCsIjYb7/IdfqxorK5+xUMyi4vOKcFy10wKJYc63NSdKI8mNME+uJqfatkPmOSMMUiojrL58IePKBm3gvQ==}
+
+  '@myschool/schema@file:packages/schema':
+    resolution: {directory: packages/schema, type: directory}
 
   '@napi-rs/nice-android-arm-eabi@1.0.2':
     resolution: {integrity: sha512-15rqDjmQV5q62ynD+HqSA5puWdN6xBqsXLyKiUwuSlSlxn791/cafJ9Z2SWFgsfIt19lx282Yp8xLrM5vM4K1g==}
@@ -9288,6 +9294,10 @@ snapshots:
     dependencies:
       sparse-bitfield: 3.0.3
 
+  '@myschool/schema@file:packages/schema':
+    dependencies:
+      zod: 3.25.76
+
   '@napi-rs/nice-android-arm-eabi@1.0.2':
     optional: true
 
@@ -12504,7 +12514,7 @@ snapshots:
 
   ext-list@2.2.2:
     dependencies:
-      mime-db: 1.52.0
+      mime-db: 1.54.0
 
   ext-name@5.0.0:
     dependencies:

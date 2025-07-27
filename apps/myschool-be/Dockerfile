@@ -5,20 +5,15 @@ RUN corepack enable
 
 FROM base AS build
 WORKDIR /app
-COPY package.json pnpm-lock.yaml ./
-COPY apps/myschool-be/package.json apps/myschool-be/
-COPY pnpm-workspace.yaml ./
-COPY . .
-RUN pnpm install -r --frozen-lockfile
+COPY pnpm-lock.yaml pnpm-workspace.yaml ./
+RUN pnpm fetch --prod
+RUN pnpm install -r --offline --prod
+ADD . .
 RUN pnpm --filter myschool-be build
+RUN pnpm --filter myschool-be deploy --prod /prod/api
 
 FROM base AS prod-be
-WORKDIR /app
-COPY --from=build /app /app
-RUN rm -rf node_modules
-RUN pnpm --filter myschool-be install
-RUN pnpm --filter myschool-be add express
-RUN pnpm --filter myschool-be deploy --prod /app/prod
-WORKDIR /app/prod
+COPY --from=build /prod/api /prod/api
+WORKDIR /prod/api
 EXPOSE 3000
 CMD ["node", "dist/main.js"]
