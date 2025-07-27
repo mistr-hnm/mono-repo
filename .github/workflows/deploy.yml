@@ -57,3 +57,42 @@ jobs:
           tags: | 
             ghcr.io/mistr-hnm/myschool-be:latest
             ghcr.io/mistr-hnm/myschool-be:${{ github.sha }}
+
+  deploy:
+    runs-on: ubuntu-latest
+    
+    needs:
+      - build-and-publish-fe-docker-image
+      - build-and-publish-be-docker-image
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+      
+      - name: Create Git commit hash
+        run: |
+          export GIT_COMMIT_HASH=${{ github.sha }}
+
+      - name: Add SSH host key
+        run: |
+          ssh-keygen -H myschool.devhnm.xyz >> ~/.ssh/known_hosts
+
+      - name: Copy files to server
+        run: |
+          scp docker-compose.prod.yaml ubuntu@myschool.devhnm.xyz:/home/ubuntu/
+          scp -r apps/myschool-be ubuntu@myschool.devhnm.xyz:/home/ubuntu/apps/
+          ssh ubuntu@myschool.devhnm.xyz "echo '${{ secrets.BE_APP_ENV_FILE }}' > /home/ubuntu/apps/myschool-be/.env.production"
+      
+      - name: Log in to Container Registry on server and deploy
+        run: |
+          ssh ubuntu@passman.live << 'EOF'
+            echo ${{ secrets.GHCR_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            docker pull ghcr.io/mistr-hnm/myschool-be:latest
+            docker pull ghcr.io/mistr-hnm/myschool-fe:latest
+            docker compose -f /home/ubuntu/docker-compose.prod.yaml up -d --remove-orphans
+          EOF
