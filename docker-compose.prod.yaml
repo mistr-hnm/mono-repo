@@ -7,7 +7,5 @@ services:
       - "3000:3000"
   myschool-fe:
     image: ghcr.io/mistr-hnm/myschool-fe:latest
-    env_file:
-      - ./apps/myschool-fe/.env.production
     ports:
       - "80:80"
