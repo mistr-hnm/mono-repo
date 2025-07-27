@@ -83,6 +83,7 @@ jobs:
       - name: Copy files to server
         run: |
           scp docker-compose.prod.yaml ubuntu@myschool.devhnm.xyz:/home/ubuntu/
+          ssh ubuntu@myschool.devhnm.xyz "mkdir -p /home/ubuntu/apps/"
           scp -r apps/myschool-be ubuntu@myschool.devhnm.xyz:/home/ubuntu/apps/
           ssh ubuntu@myschool.devhnm.xyz "echo '${{ secrets.BE_APP_ENV_FILE }}' > /home/ubuntu/apps/myschool-be/.env.production"
       
