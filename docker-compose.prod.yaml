@@ -1,0 +1,28 @@
+services:    
+  myschool-be:
+    build:
+      context: .
+      dockerfile: ./apps/myschool-be/Dockerfile
+      target: prod-be
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./apps/myschool-be/.env.production
+    networks:
+      - myschool-net
+
+  myschool-fe:
+    build:
+      context: .
+      dockerfile: ./apps/myschool-fe/Dockerfile
+      target: prod-fe
+      args:
+        VITE_BE_BASE_URL: "http://myschool-api.devhnm.xyz/api/v1"
+        VITE_API_KEY: "AUTHENTICATION"
+    ports:
+      - "3001:80"
+    networks:
+      - myschool-net
+
+networks:
+  myschool-net:
