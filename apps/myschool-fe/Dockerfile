@@ -6,10 +6,7 @@ RUN corepack enable
 FROM base AS build
 WORKDIR /app
 COPY . . 
-ARG VITE_BE_BASE_URL
-ARG VITE_API_KEY
-ENV VITE_BE_BASE_URL=$VITE_BE_BASE_URL
-ENV VITE_API_KEY=$VITE_API_KEY
+
 RUN pnpm install -r --frozen-lockfile
 RUN pnpm --filter myschool-fe build
 
