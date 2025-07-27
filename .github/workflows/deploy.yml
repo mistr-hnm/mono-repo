@@ -89,7 +89,7 @@ jobs:
       
       - name: Log in to Container Registry on server and deploy
         run: |
-          ssh ubuntu@passman.live << 'EOF'
+          ssh ubuntu@myschool.devhnm.xyz << 'EOF'
             echo ${{ secrets.GHCR_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
             docker pull ghcr.io/mistr-hnm/myschool-be:latest
             docker pull ghcr.io/mistr-hnm/myschool-fe:latest
