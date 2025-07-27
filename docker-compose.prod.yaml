@@ -5,5 +5,7 @@ services:
       - ./apps/myschool-be/.env.production
   myschool-fe:
     image: ghcr.io/mistr-hnm/myschool-fe:latest
+    env_file:
+      - ./apps/myschool-fe/.env.production
     ports:
       - "80:80"
