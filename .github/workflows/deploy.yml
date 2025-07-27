@@ -23,7 +23,7 @@ jobs:
           password: ${{ secrets.GHCR_TOKEN }}
 
       - name: Build and push FE docker image
-        uses: docker/build-push-actions@v6
+        uses: docker/build-push-action@v6
         with: 
           context: .
           file: ./apps/myschool-fe/Dockerfile
@@ -48,7 +48,7 @@ jobs:
           password: ${{ secrets.GHCR_TOKEN }}
 
       - name: Build and push FE docker image
-        uses: docker/build-push-actions@v6
+        uses: docker/build-push-action@v6
         with: 
           context: .
           file: ./apps/myschool-be/Dockerfile
