@@ -1,0 +1,59 @@
+name : Build myschool
+
+on: 
+  workflow_dispatch:
+
+jobs:
+  build-and-publish-fe-docker-image:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Add environment variables
+        run: |
+          echo ${{ secrets.FE_APP_ENV_FILE }} >> ./apps/myschool-fe/.env.production
+      
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with: 
+          registry: https://ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_TOKEN }}
+
+      - name: Build and push FE docker image
+        uses: docker/build-push-actions@v6
+        with: 
+          context: .
+          file: ./apps/myschool-fe/Dockerfile
+          target: prod-fe
+          push: true
+          tags: | 
+            ghcr.io/mistr-hnm/myschool-fe:latest
+            ghcr.io/mistr-hnm/myschool-fe:${{ github.sha }}
+
+  build-and-publish-be-docker-image:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+            
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with: 
+          registry: https://ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_TOKEN }}
+
+      - name: Build and push FE docker image
+        uses: docker/build-push-actions@v6
+        with: 
+          context: .
+          file: ./apps/myschool-be/Dockerfile
+          target: prod-be
+          push: true
+          tags: | 
+            ghcr.io/mistr-hnm/myschool-be:latest
+            ghcr.io/mistr-hnm/myschool-be:${{ github.sha }}
