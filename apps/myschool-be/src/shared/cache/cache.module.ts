@@ -10,7 +10,7 @@ import { createKeyv } from '@keyv/redis';
             isGlobal: true,
             imports: [ConfigModule],
             useFactory: async (configService: ConfigService) => {
-                const url = `redis://${configService.get('REDIS_HOST') + ":" + configService.get('REDIS_PORT')}`;
+                const url = configService.get('REDIS_URL');
                 return {
                     stores: [createKeyv(url)],
                 };

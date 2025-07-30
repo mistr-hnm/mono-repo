@@ -68,6 +68,7 @@ async function bootstrap() {
   }
 
   app.use('/', (req, res, next) => {
+    console.log(`url->${req.method} ${req.url}`);
     if (req.path === '/') {
       res.redirect('/docs');
     } else {
@@ -80,7 +81,7 @@ async function bootstrap() {
     theme: 'none',
     title: "MySchool",    
   }));
-
+ 
   
   app.enableCors("*")
   app.setGlobalPrefix("api/v1/")

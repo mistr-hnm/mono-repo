@@ -7,8 +7,8 @@ export class CacheService {
     constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) { }
 
 
-    async addToCache(key: string, value: string) {
-        return await this.cacheManager.set(key, value)
+    async addToCache(key: string, value: string, ttl?: number) {
+        return await this.cacheManager.set(key, value, ttl || 30000)
     }
 
     async getFromCache(key: string) {
