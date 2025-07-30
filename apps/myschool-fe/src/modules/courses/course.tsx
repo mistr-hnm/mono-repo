@@ -41,6 +41,7 @@ import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { useCreateMutation, useDeleteMutation, useUpdateMutation } from "@/services/mutation/course"
 import { useGetCourses } from "@/services/queries/course"
 import { toast } from "sonner"
+import { Skeleton } from "@/components/ui/skeleton"
 
 
 export function Courses() {
@@ -154,7 +155,7 @@ export function Courses() {
       toast.error("validation failed")
       return
     }
-    
+        
     const payLoad = result.data;
     setIsLoading(true)
     if (payLoad?._id) {
@@ -216,12 +217,18 @@ export function Courses() {
   if (isPending) {
     return (
       <div className="flex items-center justify-center h-48">
-        <p className="text-xl text-gray-600">Loading Course data...</p>
+         <p className="font-semibold">
+         Loading
+         </p>
+         <div className="px-2">
+           <Skeleton className="h-[10px] w-[50px] rounded-full" />
+           </div>
       </div>
     );
   }
 
  
+  const hasData = data && data.length > 0;
 
   return (
 
@@ -315,7 +322,7 @@ export function Courses() {
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
+            { hasData  ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow key={row.id}>
                   {row.getVisibleCells().map((cell) => (
@@ -341,6 +348,8 @@ export function Courses() {
           </TableBody>
         </Table>
       </div>
+      {hasData
+        ?
       <div className="flex items-center justify-end space-x-2 py-4">
         <div className="text-muted-foreground flex-1 text-sm">
           {table.getFilteredSelectedRowModel().rows.length} of{" "}
@@ -364,7 +373,8 @@ export function Courses() {
             Next
           </Button>
         </div>
-      </div>
+      </div>  : null
+      }
 
     </div>
   )

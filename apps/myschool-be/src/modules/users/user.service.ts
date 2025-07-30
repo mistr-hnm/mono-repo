@@ -35,9 +35,9 @@ export class UserService {
         const token = await this.jwtService.signAsync(payload)
 
         const permission = await this.permissionService.findAll()
-
+        
         await this.cacheService.addToCache('permission', JSON.stringify(permission.data));
-
+        
         return {
             status: true,
             message: "User logged in successfully.",

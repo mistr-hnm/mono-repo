@@ -23,7 +23,7 @@ export class LoginUserResponseDto {
     @ApiProperty({
         example: {
             user: 'jh3h434h3i4h34',
-            email: 'john@example.com',
+            email: 'jhon@example.com',
             token: '3ds34dsr54dsds98ds9d8s9d9sdsds8d9asyd989s8yfasdasd897asd98as',
             createdAt: new Date().toString(),
             permission: [],

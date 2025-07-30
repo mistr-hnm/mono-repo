@@ -41,11 +41,12 @@ export class AuthenticationMiddleware implements NestMiddleware {
                     throw new UnauthorizedException('Invalid authentication token')
                 }
                 throw new UnauthorizedException('Failed to authenticate token')
-            }
+            } 
 
             const cachedPermissions = await this.cacheService.getFromCache('permission') as string
+                        
             if (!cachedPermissions) {
-                throw new NotFoundException("Data not found")
+                throw new ForbiddenException("Permission not allowed")
             }
             const module = originalUrl.split("/")
             const permissions = JSON.parse(cachedPermissions)

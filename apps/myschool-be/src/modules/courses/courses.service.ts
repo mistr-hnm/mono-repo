@@ -38,13 +38,12 @@ export class CoursesService {
                 name: savedCourse.name
             }
         };
-
     }
 
     async findAll(): Promise<GetCoursesResponseDto> {
 
         const courses = await this.courseModel.find().exec();
-
+        
         if (!courses || courses.length === 0) {
             throw new NotFoundException("No Course exists.");
         } 

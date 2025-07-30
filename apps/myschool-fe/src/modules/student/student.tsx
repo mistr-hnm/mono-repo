@@ -52,8 +52,9 @@ import { useGetCourses } from "@/services/queries/course"
 import { useCreateMutation, useDeleteMutation, useUpdateMutation } from "@/services/mutation/student"
 import type { FileUploadResponse } from "@/schema/file"
 import { toast } from "sonner"
+import { Skeleton } from "@/components/ui/skeleton"
 
-export function StudentTable() {
+export function Student() {
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -102,12 +103,12 @@ export function StudentTable() {
       id: "picture",
       enableHiding: true,
       cell: ({ row }) => {
-        const picture: { _id: string, url: string } = row.original.picture as any;
+        const picture: { _id: string, buffer: string } = row.original.picture as any;
         return <>
           <div className="flex justify-center">
-            <Avatar className="">
-              <AvatarImage src={`${picture.url}`} />
-              <AvatarFallback>CN</AvatarFallback>
+            <Avatar>
+              <AvatarImage src={`${picture.buffer}`} />
+              <AvatarFallback>A</AvatarFallback>
             </Avatar>
           </div>
         </>
@@ -309,15 +310,19 @@ export function StudentTable() {
   if (isPending) {
     return (
       <div className="flex items-center justify-center h-48">
-        <p className="text-xl text-gray-600">Loading student data...</p>
+         <p className="font-semibold">
+         Loading
+         </p>
+         <div className="px-2">
+           <Skeleton className="h-[10px] w-[50px] rounded-full" />
+           </div>
       </div>
     );
   }
 
 
   const hasData = studentData && studentData.length > 0;
-  console.log("infinite loading..");
-
+  
   return (
     <div className="w-full">
       <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>

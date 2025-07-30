@@ -78,11 +78,10 @@ async function bootstrap() {
   app.use('/docs', apiReference({
     content: document,
     theme: 'none',
-    title: "MySchool",
-    
+    title: "MySchool",    
   }));
 
-
+  
   app.enableCors("*")
   app.setGlobalPrefix("api/v1/")
   app.useGlobalPipes(new ValidationPipe({whitelist : true, forbidNonWhitelisted : true}));

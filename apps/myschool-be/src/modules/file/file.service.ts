@@ -2,11 +2,12 @@ import { BadRequestException, Injectable, InternalServerErrorException, NotFound
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { S3Client, DeleteObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
 import { Upload } from '@aws-sdk/lib-storage';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { S3Client, DeleteObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
 import { CreateFileResponseDto, DeleteFileResponseDto, FileDto, GetFileResponseDto } from './schemas/file.dto';
 import { File, FileDocument } from './schemas/file.schema'
+import { Readable } from 'stream';
 
 
 @Injectable()
@@ -32,19 +33,18 @@ export class FileService {
     }
 
     async uploadFile(file: Express.Multer.File, isPublic: boolean = false): Promise<CreateFileResponseDto> {
-
-        const filename = file.originalname.replace(/[^a-z0-9.-]/gi, "_").toLowerCase();
-        const fileKey = `${Date.now()}-${filename}`;
-
-        const uploadParams: any = {
-            Bucket: this.s3BucketName,
-            Key: fileKey,
-            Body: file.buffer,
-            ContentType: file.mimetype,
-            ACL: isPublic ? 'public-read' : 'private',
-        };
-
         try {
+            const filename = file.originalname.replace(/[^a-z0-9.-]/gi, "_").toLowerCase();
+            const fileKey = `${Date.now()}-${filename}`;
+
+            const uploadParams: any = {
+                Bucket: this.s3BucketName,
+                Key: fileKey,
+                Body: file.buffer,
+                ContentType: file.mimetype,
+                ACL: isPublic ? 'public-read' : 'private',
+            };
+
             const uploader = new Upload({
                 client: this.s3Client,
                 params: uploadParams
@@ -81,19 +81,17 @@ export class FileService {
 
       // Defaults to 3600 (1 hour)
       async getPresignedUrl(key: string, expiresInSeconds: number = 3600): Promise<GetFileResponseDto> {
-        const command = new GetObjectCommand({
-            Bucket: this.s3BucketName,
-            Key: key,
-        });
-
         try {
-
             const file = await this.fileModel.findOne({ key: key })
 
             if (!file) {
                 throw new NotFoundException(`File not found.`)
-            }
+            }          
 
+            const command = new GetObjectCommand({
+                Bucket: this.s3BucketName,
+                Key: key,
+            });
             const presignedUrl = await getSignedUrl(this.s3Client, command, {
                 expiresIn: expiresInSeconds,
             });
@@ -120,12 +118,6 @@ export class FileService {
         }
 
         try {
-            const file = await this.fileModel.findOne({ key: key })
-
-            if (!file) {
-                throw new NotFoundException(`File not found.`);
-            }
-
             const command = new DeleteObjectCommand(deleteParams)
             await this.s3Client.send(command)
 
@@ -139,5 +131,31 @@ export class FileService {
         }
     }
 
+    async findById(id: string): Promise<FileDto | null> {
+       return await this.fileModel.findById(id);
+    }
+
+
+    async findByKey(key: string): Promise<FileDto | null> {
+        return await this.fileModel.findOne({ key });
+    }
+
+
+    async getObjectBuffer(key: string): Promise<Buffer> {
+        const command = new GetObjectCommand({
+             Bucket : this.s3BucketName,
+             Key : key
+        });
+        const response = await this.s3Client.send(command);
+        const stream = response.Body as Readable;
+        // Convert stream to buffer
+        const chunks: Buffer[] = [];
+        return new Promise((resolve, reject) => {
+            stream.on('data', (chunk) => chunks.push(chunk));
+            stream.on('error', reject);
+            stream.on('end', () => resolve(Buffer.concat(chunks)));
+        });
+    }
+ 
   
 }

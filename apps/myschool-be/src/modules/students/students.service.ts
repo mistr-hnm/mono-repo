@@ -13,13 +13,16 @@ import {
     GetAllStudentsDto
 } from './schemas/student.dto';
 import { Course, CourseDocument } from '../courses/schemas/course.schema';
+import { FileService } from '../file/file.service';
 
 @Injectable()
 export class StudentsService {
 
     constructor(
         @InjectModel(Student.name) private studentModel: Model<StudentDocument>,
-        @InjectModel(Course.name) private courseModel: Model<CourseDocument>
+        @InjectModel(Course.name) private courseModel: Model<CourseDocument>,
+
+        private fileService : FileService
     ) { }
 
     async create(createStudentDto: CreateStudentDto): Promise<CreateStudentResponseDto> {
@@ -65,7 +68,7 @@ export class StudentsService {
 
         const query = this.studentModel.find()
             .populate('enrollmentCourse', ['_id', 'courseId', 'name', 'description'])
-            .populate('picture',['_id','url'])
+            .populate('picture',['_id','key'])
 
         if (limit !== undefined && offset !== undefined) {
             query.limit(limit).skip(offset);
@@ -76,12 +79,25 @@ export class StudentsService {
         if (!students || students.length === 0) {
             throw new NotFoundException("Student not found.")
         }
-        
-        
-        return {
-            status: true,
-            message: "Student fetched successfully",
-            data: students.map(student => ({
+        const includeBuffers = true
+        const processStudent = async (student) => {
+            let picture = student.picture;
+            
+            if (includeBuffers && student.picture) {
+                try {
+                    const buffer = await this.fileService.getObjectBuffer(student.picture.key);
+                    picture = {
+                        buffer: `data:image/jpeg;base64,${buffer.toString('base64')}`,
+                        size: buffer.length,
+                        _id: student.picture._id,
+                        key: student.picture.key
+                    };
+                } catch (error) {
+                    console.error(`Error loading buffer for ${student.picture._id}:`, error);
+                }
+            }
+    
+            return {
                 _id: student._id.toString(),
                 enrollmentNumber: student.enrollmentNumber,
                 fullname: student.fullname,
@@ -93,9 +109,16 @@ export class StudentsService {
                     description: (student.enrollmentCourse as Course).description
                 },
                 description: student.description,
-                picture: student?.picture, // @todo
+                picture,
                 createdAt: student.createdAt.toDateString()
-            }))
+            };
+        };
+        const processedStudents = await Promise.all(students.map(processStudent));
+        
+        return {
+            status: true,
+            message: "Student fetched successfully",
+            data: processedStudents
         }
     }
 

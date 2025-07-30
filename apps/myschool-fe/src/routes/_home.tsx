@@ -1,3 +1,4 @@
+import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, navigationMenuTriggerStyle } from '@/components/ui/navigation-menu';
 import { createFileRoute, Link, Outlet, redirect } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/_home')({
@@ -13,30 +14,50 @@ export const Route = createFileRoute('/_home')({
 })
 
 function Home() {
-  return (<div>
-    <div className='flex justify-between'>
-      <div className="p-2 flex gap-2">
-        <Link to="/"  className="[&.active]:font-bold">
-          Home
-        </Link>{' '}
-        <Link to="/about"  className="[&.active]:font-bold">
-          About
-        </Link>{' '}
-        <Link to="/courses"  className="[&.active]:font-bold">
-          Courses
-        </Link>{' '}
-        <Link to="/students"  className="[&.active]:font-bold">
-          Student
-        </Link>
-      </div>
-      <div className="p-2  gap-2"  >
-        <Link to="/" onClick={()=>{ localStorage.clear()}} >
-          Logout
-        </Link>
-      </div>
-    </div>
-    <hr />
+  return (
+    <div>
+      <div className='flex justify-between'>
+        <div className="p-2 flex gap-2">
+          <NavigationMenu viewport={false}>
+            <NavigationMenuList>
+              <NavigationMenuItem>
+                <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
+                  <Link to="/">
+                    Home
+                  </Link>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
 
-    <Outlet />
-  </div>)
+              <NavigationMenuItem>
+                <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
+                  <Link to="/courses">
+                    Courses
+                  </Link>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+
+              <NavigationMenuItem>
+                <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
+                  <Link to="/students">
+                    Student
+                  </Link>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+            </NavigationMenuList>
+          </NavigationMenu>
+
+        </div>
+        <div className="p-2  gap-2"  >
+          <Link to="/" onClick={() => { localStorage.clear() }} >
+            Logout
+          </Link>
+        </div>
+      </div>
+      <hr />
+      <Outlet />
+
+
+
+    </div>
+  )
 }
