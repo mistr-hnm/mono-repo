@@ -8,7 +8,7 @@ export class CacheService {
 
 
     async addToCache(key: string, value: string, ttl?: number) {
-        return await this.cacheManager.set(key, value, ttl || 30000)
+        return await this.cacheManager.set(key, value ,ttl || (1000 * 60 * 60))
     }
 
     async getFromCache(key: string) {
