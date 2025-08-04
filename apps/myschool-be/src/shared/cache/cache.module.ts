@@ -2,22 +2,24 @@ import { CacheModule } from "@nestjs/cache-manager";
 import { Module } from "@nestjs/common";
 import { CacheService } from "./cache.service";
 import { ConfigModule, ConfigService } from "@nestjs/config";
-import * as redisStore from 'cache-manager-redis-store';
+import { createKeyv, Keyv } from '@keyv/redis';
+import { CacheableMemory } from 'cacheable';
 
 @Module({
     imports: [
         CacheModule.registerAsync({
-            isGlobal: true,
-            imports: [ConfigModule],
             useFactory: async (configService: ConfigService) => {
-                return {
-                    store: redisStore,
-                    url: configService.get('REDIS_URL'),
-                    ttl: 600, // 10 minutes default
-                };
+              return {
+                stores: [
+                  new Keyv({
+                    store: new CacheableMemory({ ttl: 60000, lruSize: 5000 }),
+                  }),
+                  createKeyv(configService.get('REDIS_URL')),
+                ],
+              };
             },
             inject: [ConfigService]
-        })
+          }),      
     ],
     providers: [CacheService],
     exports: [CacheService, CacheModule]

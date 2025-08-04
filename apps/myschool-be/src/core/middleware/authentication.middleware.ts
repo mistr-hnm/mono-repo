@@ -1,6 +1,7 @@
 import { ForbiddenException, Injectable, NestMiddleware, NotFoundException, UnauthorizedException } from "@nestjs/common"
 import { JsonWebTokenError, JwtService, TokenExpiredError } from "@nestjs/jwt"
 import { Request, Response, NextFunction } from 'express'
+import { PermissionService } from "src/modules/permission/permission.service";
 import { CacheService } from "src/shared/cache/cache.service";
 
 @Injectable()
@@ -8,7 +9,8 @@ export class AuthenticationMiddleware implements NestMiddleware {
 
     constructor(
         private readonly jwtService: JwtService,
-        private readonly cacheService: CacheService
+        private readonly cacheService: CacheService,
+        private readonly permissionService: PermissionService,
     ) { }
 
 
@@ -41,12 +43,18 @@ export class AuthenticationMiddleware implements NestMiddleware {
                     throw new UnauthorizedException('Invalid authentication token')
                 }
                 throw new UnauthorizedException('Failed to authenticate token')
-            } 
+            }
 
-            const cachedPermissions = await this.cacheService.getFromCache('permission') as string
+            let cachedPermissions = await this.cacheService.getFromCache('permission') as string
+            
                         
             if (!cachedPermissions) {
-                throw new ForbiddenException("Permission not allowed")
+                const permission = await this.permissionService.findAll()
+                                
+                if(!permission?.data){
+                    throw new ForbiddenException("Permission not allowed")
+                }
+                cachedPermissions = permission?.data?.toString();
             }
             const module = originalUrl.split("/")
             const permissions = JSON.parse(cachedPermissions)
