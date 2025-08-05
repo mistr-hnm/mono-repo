@@ -55,8 +55,9 @@ export class AuthenticationMiddleware implements NestMiddleware {
                     throw new ForbiddenException("Permission not allowed")
                 }
                 cachedPermissions = permission?.data?.toString();
-            }
-            const module = originalUrl.split("/")
+            } 
+            const cleanUrl = originalUrl.split('?')[0];
+            const module = cleanUrl.split("/")
             const permissions = JSON.parse(cachedPermissions)
             
             if (permissions.findIndex((element) => element.module == module[3]) < 0) {

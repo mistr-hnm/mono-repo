@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsNotEmpty, IsOptional, IsNumber, IsPositive, Min } from 'class-validator';
+import { GetPaginationDto } from 'src/lib/pagintation.util';
  export class CreateCourseDto {
     @ApiProperty({ example: 101, description: "The unique ID of the course" })
     @IsNumber()
@@ -183,6 +184,27 @@ export class GetCoursesResponseDto {
         name: string; 
         createdAt : string 
     }[];
+
+    @ApiProperty({
+        type: [GetPaginationDto],
+        example: {
+                page: 1,
+                limit: 10,
+                total: 10,
+                totalPages: 1, 
+                hasNext: false,
+                hasPrev: false,
+        },
+        description: 'An pagination details of list',
+    })
+    pagination?: {
+        page: number,
+        limit: number,
+        total: number,
+        totalPages: number,
+        hasNext: boolean,
+        hasPrev: boolean,
+    };
 }
  
 export class DeleteCourseDto {

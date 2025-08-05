@@ -9,6 +9,7 @@ import {
     IsMongoId, 
     IsPositive, 
 } from 'class-validator';
+import { GetPaginationDto } from 'src/lib/pagintation.util';
  
 class StudentEnrolledCourseResponseDto {
     @ApiProperty({ example: '60c72b2f9b1e8b0015b0e4d7', description: 'The MongoDB ObjectId of the enrolled course' })
@@ -314,6 +315,27 @@ export class GetStudentsResponseDto {
         picture?: string; 
         createdAt?: string;
     }[];
+
+    @ApiProperty({
+        type: [GetPaginationDto],
+        example: {
+                page: 1,
+                limit: 10,
+                total: 10,
+                totalPages: 1, 
+                hasNext: false,
+                hasPrev: false,
+        },
+        description: 'An pagination details of list',
+    })
+    pagination?: {
+        page: number,
+        limit: number,
+        total: number,
+        totalPages: number,
+        hasNext: boolean,
+        hasPrev: boolean,
+    };
 
    
 }

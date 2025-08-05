@@ -1,9 +1,10 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, Query } from '@nestjs/common';
 import { ApiBody, ApiHeaders, ApiOperation, ApiParam, ApiBadRequestResponse, ApiUnauthorizedResponse, ApiOkResponse, ApiNotFoundResponse, ApiInternalServerErrorResponse } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { signture } from 'src/core/meta/global.header';
 import { CreateUserDto, CreateUserResponseDto, DeleteUserResponseDto, GetUserResponseDto, GetUsersResponseDto, LoginUserDto, LoginUserResponseDto, UpdateUserDto, UpdateUserResponseDto } from './schemas/user.dto';
 import { BadRequestResponseDto, InternalServerErrorResponseDto, NotFoundResponseDto, UnauthorizedResponseDto } from 'src/lib/global.response';
+import { PaginationDto } from 'src/lib/pagintation.util';
 
 @Controller()
 export class UserController {
@@ -50,8 +51,8 @@ export class UserController {
     @ApiNotFoundResponse({ description: "Users not found" , type : NotFoundResponseDto })
     @ApiInternalServerErrorResponse({ description: "Internal server error" , type : InternalServerErrorResponseDto })
     @Get()
-    findAll() {
-        return this.userService.findAll()
+    findAll(@Query() paginationDto : PaginationDto) {
+        return this.userService.findAll(paginationDto)
     }
 
     @ApiOperation({ summary: "Get user by ID" })

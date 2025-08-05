@@ -1,5 +1,5 @@
-import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
-import { ApiBody, ApiHeaders, ApiOperation, ApiParam, ApiOkResponse, ApiBadRequestResponse, ApiUnauthorizedResponse, ApiNotFoundResponse, ApiInternalServerErrorResponse } from '@nestjs/swagger'; // Added new decorators
+import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common';
+import { ApiBody, ApiHeaders, ApiOperation, ApiParam, ApiOkResponse, ApiBadRequestResponse, ApiUnauthorizedResponse, ApiNotFoundResponse, ApiInternalServerErrorResponse, ApiQuery } from '@nestjs/swagger'; // Added new decorators
 import { CoursesService } from './courses.service';
 import {
     CreateCourseDto,
@@ -12,6 +12,7 @@ import {
 } from './schemas/course.dto';
 import { signture } from 'src/core/meta/global.header';
 import { BadRequestResponseDto, InternalServerErrorResponseDto, NotFoundResponseDto, UnauthorizedResponseDto } from 'src/lib/global.response';
+import { PaginationDto } from 'src/lib/pagintation.util';
 
 @Controller() 
 export class CoursesController {
@@ -39,10 +40,9 @@ export class CoursesController {
     @ApiOkResponse({ description: "Courses fetched successfully", type: GetCoursesResponseDto })
     @ApiUnauthorizedResponse({ description: "Unauthorized", type : UnauthorizedResponseDto })
     @ApiNotFoundResponse({ description: "Course not found." , type : NotFoundResponseDto })
-    // @ApiQuery({ type: GetAllCoursesDto, required: false })
     @Get()
-    async findAll() { //  pagination/filters, with @Query() params
-        return await this.courseService.findAll();
+    async findAll(@Query() paginationDto : PaginationDto) {
+        return await this.courseService.findAll(paginationDto);
     }
 
     @ApiOperation({ summary: "Get course by ID" })

@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsNotEmpty, IsOptional, IsArray, ArrayUnique, IsMongoId, IsNumber, Min } from 'class-validator';
+import { GetPaginationDto } from 'src/lib/pagintation.util';
  
 export class CreatePermissionDto {
     @ApiProperty({ example: "users", description: "The module to which this permission applies (e.g., 'users', 'products', 'settings')" })
@@ -200,6 +201,29 @@ export class GetPermissionsResponseDto {
         permission: string[];
         description?: string; 
     }[];
+
+
+    @ApiProperty({
+        type: [GetPaginationDto],
+        example: {
+                page: 1,
+                limit: 10,
+                total: 10,
+                totalPages: 1, 
+                hasNext: false,
+                hasPrev: false,
+        },
+        description: 'An pagination details of list',
+    })
+    pagination?: {
+        page: number,
+        limit: number,
+        total: number,
+        totalPages: number,
+        hasNext: boolean,
+        hasPrev: boolean,
+    };
+    
 }
  
 export class DeletePermissionDto {

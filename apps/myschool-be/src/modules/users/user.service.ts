@@ -8,6 +8,7 @@ import { JwtService } from '@nestjs/jwt';
 import { PermissionService } from '../permission/permission.service';
 import { CacheService } from '../../shared/cache/cache.service';
 import { CreateUserDto, CreateUserResponseDto, DeleteUserResponseDto, GetUserResponseDto, GetUsersResponseDto, LoginUserDto, LoginUserResponseDto, UpdateUserDto, UpdateUserResponseDto } from './schemas/user.dto';
+import { PaginationDto, PaginationUtil } from 'src/lib/pagintation.util';
 
 @Injectable()
 export class UserService {
@@ -70,23 +71,44 @@ export class UserService {
         };
     }
 
-    async findAll(): Promise<GetUsersResponseDto> {
-        const user = await this.userModel.find();
+    async findAll(paginationDto: PaginationDto): Promise<GetUsersResponseDto> {
+        
+        const { page, limit } = paginationDto;
+        const skip = PaginationUtil.getSkip(page, limit);
+
+        const [user, total] = await Promise.all([
+            this.userModel
+                .find()
+                .skip(skip)
+                .limit(limit)
+                .sort({ _id: 1 })
+                .exec(),
+
+            this.userModel
+                .countDocuments()
+                .exec()
+        ])
+         
         if (!user) {
             throw new NotFoundException("User not found.")
         }
-        return {
-            status: true,
-            message: "User fetched successfully.",
-            data: user.map((user) => {
-                return {
-                    _id: user.id,
-                    name: user.name,
-                    email: user.email,
-                    description: user.description,
-                }
-            })
-        };
+        const data = user.map((user) => {
+            return {
+                _id: user.id,
+                name: user.name,
+                email: user.email,
+                description: user.description,
+            }
+        })
+       
+        return PaginationUtil.paginate(
+            true, 
+            "User fetched successfully",
+            data,
+            total,
+            page,
+            limit
+        );
     }
 
     async findById(id: string): Promise<GetUserResponseDto> {

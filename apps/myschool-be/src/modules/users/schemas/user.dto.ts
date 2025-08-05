@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsEmail, IsNotEmpty, IsOptional, isEmpty } from 'class-validator';
+import { GetPaginationDto } from 'src/lib/pagintation.util';
 
 export class LoginUserDto {
 
@@ -238,7 +239,28 @@ export class GetUsersResponseDto {
         name: string;
         email: string;
         description?: string;
-    }[]
+    }[];
+
+    @ApiProperty({
+        type: [GetPaginationDto],
+        example: {
+                page: 1,
+                limit: 10,
+                total: 10,
+                totalPages: 1, 
+                hasNext: false,
+                hasPrev: false,
+        },
+        description: 'An pagination details of list',
+    })
+    pagination?: {
+        page: number,
+        limit: number,
+        total: number,
+        totalPages: number,
+        hasNext: boolean,
+        hasPrev: boolean,
+    };
 
 }
 

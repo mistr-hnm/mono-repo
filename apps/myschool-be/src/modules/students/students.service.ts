@@ -14,6 +14,7 @@ import {
 } from './schemas/student.dto';
 import { Course, CourseDocument } from '../courses/schemas/course.schema';
 import { FileService } from '../file/file.service';
+import { PaginationDto, PaginationUtil } from 'src/lib/pagintation.util';
 
 @Injectable()
 export class StudentsService {
@@ -63,18 +64,24 @@ export class StudentsService {
 
     }
 
-    async findAll(getAllStudentsDto?: GetAllStudentsDto): Promise<GetStudentsResponseDto> {
-        const { limit, offset } = getAllStudentsDto || {} //@todo
+    async findAll(paginationDto: PaginationDto): Promise<GetStudentsResponseDto> {
+        const { page, limit } = paginationDto;
+        const skip = PaginationUtil.getSkip(page, limit);
 
-        const query = this.studentModel.find()
-            .populate('enrollmentCourse', ['_id', 'courseId', 'name', 'description'])
-            .populate('picture',['_id','key'])
+        const [students, total] = await Promise.all([
+            this.studentModel
+                .find()
+                .populate('enrollmentCourse', ['_id', 'courseId', 'name', 'description'])
+                .populate('picture',['_id','key'])
+                .skip(skip)
+                .limit(limit)
+                .sort({ _id: 1 })
+                .exec(),
 
-        if (limit !== undefined && offset !== undefined) {
-            query.limit(limit).skip(offset);
-        }
-
-        const students = await query.exec()
+            this.studentModel
+                .countDocuments()
+                .exec()
+        ])
 
         if (!students || students.length === 0) {
             throw new NotFoundException("Student not found.")
@@ -113,13 +120,16 @@ export class StudentsService {
                 createdAt: student.createdAt.toDateString()
             };
         };
-        const processedStudents = await Promise.all(students.map(processStudent));
+        const data = await Promise.all(students.map(processStudent));
         
-        return {
-            status: true,
-            message: "Student fetched successfully",
-            data: processedStudents
-        }
+        return PaginationUtil.paginate(
+                        true, 
+                        "Student fetched successfully",
+                        data,
+                        total,
+                        page,
+                        limit
+        );
     }
 
     async findById(id: string): Promise<GetStudentResponseDto> {

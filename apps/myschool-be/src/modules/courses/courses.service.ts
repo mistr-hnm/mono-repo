@@ -11,6 +11,7 @@ import {
     GetCoursesResponseDto,
     DeleteCourseResponseDto
 } from './schemas/course.dto';
+import { PaginationDto, PaginationUtil } from 'src/lib/pagintation.util';
 
 @Injectable()
 export class CoursesService {
@@ -40,28 +41,44 @@ export class CoursesService {
         };
     }
 
-    async findAll(): Promise<GetCoursesResponseDto> {
+    async findAll(paginationDto: PaginationDto): Promise<GetCoursesResponseDto> {
+        const { page, limit } = paginationDto;
+        const skip = PaginationUtil.getSkip(page, limit);
 
-        const courses = await this.courseModel.find().exec();
-        
+        const [courses, total] = await Promise.all([
+            this.courseModel
+                .find()
+                .skip(skip)
+                .limit(limit)
+                .sort({ _id: 1 })
+                .exec(),
+
+            this.courseModel
+                .countDocuments()
+                .exec()
+        ])
+
         if (!courses || courses.length === 0) {
             throw new NotFoundException("No Course exists.");
-        } 
+        }
 
-        const filteredCourse = courses.map((course: Course) => { 
+        const data = courses.map((course: Course) => {
             return {
                 _id: course._id.toString(),
-                name : course.name,
-                createdAt : course.createdAt.toDateString(), 
-                courseId : course.courseId                
+                name: course.name,
+                createdAt: course.createdAt.toDateString(),
+                courseId: course.courseId
             }
         })
- 
-        return {
-            status: true,
-            message: "Courses fetched successfully",
-            data: filteredCourse
-        };
+
+        return PaginationUtil.paginate(
+             true, 
+             "Courses fetched successfully",
+             data,
+             total,
+             page,
+             limit
+         );
     }
 
 
@@ -79,7 +96,7 @@ export class CoursesService {
             data: {
                 _id: course._id.toString(),
                 courseId: course.courseId,
-                name: course.name, 
+                name: course.name,
                 createdAt: course.createdAt.toDateString(),
             }
         };

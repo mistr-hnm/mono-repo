@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common';
 import { ApiBody, ApiHeaders, ApiOperation, ApiParam, ApiOkResponse, ApiBadRequestResponse, ApiUnauthorizedResponse, ApiNotFoundResponse, ApiInternalServerErrorResponse } from '@nestjs/swagger'; // Added specific ApiResponse decorators
 import { StudentsService } from './students.service'; 
 import {
@@ -12,6 +12,7 @@ import {
 } from './schemas/student.dto'; 
 import { signture } from 'src/core/meta/global.header'; 
 import { BadRequestResponseDto, InternalServerErrorResponseDto, NotFoundResponseDto, UnauthorizedResponseDto } from 'src/lib/global.response';
+import { PaginationDto } from 'src/lib/pagintation.util';
 
 @Controller()
 export class StudentsController {
@@ -40,10 +41,9 @@ export class StudentsController {
     @ApiBadRequestResponse({ description: "Bad Request" , type : BadRequestResponseDto })
     @ApiInternalServerErrorResponse({ description: "Internal server error" , type : InternalServerErrorResponseDto })
     @ApiUnauthorizedResponse({ description: "Unauthorized", type : UnauthorizedResponseDto  })
-    // @ApiQuery({ type: GetAllStudentsDto, required: false }) @todo
     @Get()
-    async findAll() { 
-        return await this.studentService.findAll();
+    async findAll(@Query() paginationDto : PaginationDto) {
+        return await this.studentService.findAll(paginationDto);
     }
 
     @ApiOperation({ summary: "Get student by ID" })
