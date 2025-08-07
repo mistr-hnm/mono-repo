@@ -1,14 +1,10 @@
 import {
-  type ColumnFiltersState,
   flexRender,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  type SortingState,
-  useReactTable,
-  type VisibilityState,
-  type ColumnDef
+  getCoreRowModel, 
+  getPaginationRowModel, 
+  useReactTable, 
+  type ColumnDef,
+  type PaginationState
 } from "@tanstack/react-table"
 import {
   AlertDialog,
@@ -42,18 +38,39 @@ import { useCreateMutation, useDeleteMutation, useUpdateMutation } from "@/servi
 import { useGetCourses } from "@/services/queries/course"
 import { toast } from "sonner"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Route } from "@/routes/_home/courses"
+import { useMemo } from 'react';
+import { useNavigate } from "@tanstack/react-router"
 
+export function CourseList() {
 
-export function Courses() {
+  const navigate = useNavigate();
 
+  const {page, limit} =  Route.useSearch();
   const [isLoading, setIsLoading] = useState(false)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+ 
+  
+  const pagination = useMemo<PaginationState>(() => ({
+    pageIndex: page,
+    pageSize: limit,
+  }), [page, limit]);
 
 
-  const [sorting, setSorting] = useState<SortingState>([])
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
-  const [rowSelection, setRowSelection] = useState({})
+  const setPagination = (updaterOrValue: PaginationState | ((old: PaginationState) => PaginationState)) => {
+    const newPagination = typeof updaterOrValue === 'function' 
+      ? updaterOrValue(pagination) 
+      : updaterOrValue;
+    
+    navigate({
+      to: '/courses',
+      search: {
+        page: newPagination.pageIndex + 1, 
+        limit: newPagination.pageSize,
+      },
+      replace: true, 
+    });
+  }
 
   const formSchema = z.object({
     _id: z.string().optional(),
@@ -69,7 +86,7 @@ export function Courses() {
     }
   })
 
-  const { isPending, data } = useGetCourses();
+  const { isPending, data : courseData } = useGetCourses(pagination);
   const createMutation = useCreateMutation();
   const updateMutation = useUpdateMutation();
   const deleteMutation = useDeleteMutation();
@@ -127,26 +144,6 @@ export function Courses() {
       },
     }
   ]
-
-  const table = useReactTable({
-    data: data,
-    columns,
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
-    state: {
-      sorting,
-      columnFilters,
-      columnVisibility,
-      rowSelection,
-    },
-  })
-
 
   const onSubmit = async () => {
     const result = formSchema.safeParse({ ...form.getValues() });
@@ -214,6 +211,44 @@ export function Courses() {
 
   }
 
+ 
+  const goToPage = (pageNumber: number) => { 
+    navigate({
+      to: '/courses',
+      search: {
+        page: pageNumber,
+        limit: pagination.pageSize,
+      },
+      replace: true,
+    });
+  }
+  
+
+  const changePageSize = (newPageSize: number) => { 
+    navigate({
+      to: '/courses',
+      search: {
+        page: 1,
+        limit: newPageSize,
+      },
+      replace: true,
+    });
+  }
+ 
+
+  const table = useReactTable({
+    data: courseData?.data || [],
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    manualPagination: true,
+    pageCount: courseData?.pagination?.totalPages || 0,
+    state : {
+      pagination
+    },
+    onPaginationChange: setPagination,
+  })
+
   if (isPending) {
     return (
       <div className="flex items-center justify-center h-48">
@@ -228,7 +263,7 @@ export function Courses() {
   }
 
  
-  const hasData = data && data.length > 0;
+  const hasData = courseData?.data && courseData?.data?.length > 0;
 
   return (
 
@@ -350,32 +385,62 @@ export function Courses() {
       </div>
       {hasData
         ?
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <div className="text-muted-foreground flex-1 text-sm">
-          {table.getFilteredSelectedRowModel().rows.length} of{" "}
-          {table.getFilteredRowModel().rows.length} row(s) selected.
-        </div>
-        <div className="space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            Previous
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          >
-            Next
-          </Button>
-        </div>
-      </div>  : null
+        
+        <div className="flex justify-end py-2" >
+          <div className="flex items-center gap-2">
+            <button
+              className="border rounded p-1"
+              onClick={() => goToPage(1)}
+              disabled={page == 1}
+            >
+              {'<<'}
+            </button>
+            <button
+              className="border rounded p-1"
+              onClick={() => goToPage(page - 1)}
+              disabled={page == 1}
+            >
+              {'<'} 
+            </button>
+            <button
+              className="border rounded p-1"
+              onClick={() => goToPage(page + 1)}
+              disabled={!courseData?.pagination?.hasNext}
+            >
+              {'>'} 
+            </button>
+            <button
+              className="border rounded p-1"
+              onClick={() => goToPage(courseData?.pagination.totalPages || 1)}
+              disabled={!courseData?.pagination?.hasNext}>
+              {'>>'}
+            </button>
+            <span className="flex items-center gap-1">
+              <div>Page</div>
+              <strong>
+                {page} of{' '}
+                {courseData?.pagination?.totalPages || 1}
+              </strong>
+            </span>
+            <select
+              value={limit}
+              onChange={e => {
+                changePageSize(Number(e.target.value))
+              }}
+            >
+              {[10, 20, 30, 40, 50].map(pageSize => (
+                <option key={pageSize} value={pageSize}>
+                  Show {pageSize}
+                </option>
+              ))}
+            </select>
+            {/* {
+              JSON.stringify(courseData?.pagination)
+            } */}
+          </div>     
+        </div>     
+       : null
       }
-
     </div>
   )
 }

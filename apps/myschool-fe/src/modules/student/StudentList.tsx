@@ -1,14 +1,10 @@
-import {
-  type ColumnFiltersState,
+import { 
   flexRender,
-  getCoreRowModel,
-  getFilteredRowModel,
+  getCoreRowModel, 
+  useReactTable, 
+  type ColumnDef,
   getPaginationRowModel,
-  getSortedRowModel,
-  type SortingState,
-  useReactTable,
-  type VisibilityState,
-  type ColumnDef
+  type PaginationState
 } from "@tanstack/react-table"
 import {
   AlertDialog,
@@ -30,7 +26,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { useState } from "react"
+import { useMemo, useState } from "react"
 
 import { useForm } from "react-hook-form"
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
@@ -53,20 +49,41 @@ import { useCreateMutation, useDeleteMutation, useUpdateMutation } from "@/servi
 import type { FileUploadResponse } from "@/schema/file"
 import { toast } from "sonner"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useNavigate } from "@tanstack/react-router"
+import { Route } from "@/routes/_home/students"
 
-export function Student() {
+export function StudentList() {
+
+  const navigate = useNavigate();
+
+  const {page, limit} =  Route.useSearch();
+
+  const pagination = useMemo<PaginationState>(() => ({
+    pageIndex: page,
+    pageSize: limit,
+  }), [page, limit]);
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-
-  const [sorting, setSorting] = useState<SortingState>([])
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
-  const [rowSelection, setRowSelection] = useState({})
+  const { data: studentData, isPending } = useGetStudents(pagination)
+  const { data: courseData } = useGetCourses({pageIndex : 1, pageSize: 10});
 
 
-  const { data: studentData, isPending } = useGetStudents()
-  const { data: courseData } = useGetCourses();
+  const setPagination = (updaterOrValue: PaginationState | ((old: PaginationState) => PaginationState)) => {
+      const newPagination = typeof updaterOrValue === 'function' 
+        ? updaterOrValue(pagination) 
+        : updaterOrValue;
+      
+      navigate({
+        to: '/students',
+        search: {
+          page: newPagination.pageIndex + 1, 
+          limit: newPagination.pageSize,
+        },
+        replace: true, 
+      });
+  }
+  
 
   const createMutation = useCreateMutation()
   const updateMutation = useUpdateMutation()
@@ -203,23 +220,41 @@ export function Student() {
     }
   ]
 
+  const goToPage = (pageNumber: number) => { 
+    navigate({
+      to: '/students',
+      search: {
+        page: pageNumber,
+        limit: pagination.pageSize,
+      },
+      replace: true,
+    });
+  }
+  
+
+  const changePageSize = (newPageSize: number) => {
+    navigate({
+      to: '/students',
+      search: {
+        page: 1,
+        limit: newPageSize,
+      },
+      replace: true,
+    });
+  }
+  
+  
   const table = useReactTable({
-    data: studentData || [],
+    data: studentData?.data || [],
     columns,
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
-    state: {
-      sorting,
-      columnFilters,
-      columnVisibility,
-      rowSelection,
+    getCoreRowModel : getCoreRowModel(),
+    getPaginationRowModel : getPaginationRowModel(), 
+    manualPagination: true,
+    pageCount: studentData?.pagination?.totalPages || 0,
+    state : {
+      pagination
     },
+    onPaginationChange: setPagination,
   })
 
   const onFileUpload = (event: FileUploadResponse) => {
@@ -231,7 +266,6 @@ export function Student() {
 
 
   const onSubmit = async () => {
-
     try {
       const model = { ...form.getValues() }
       model["dateofbirth"] = new Date(model.dateofbirth)
@@ -321,8 +355,8 @@ export function Student() {
   }
 
 
-  const hasData = studentData && studentData.length > 0;
-  
+  const hasData = studentData?.data && studentData?.data?.length > 0;
+    
   return (
     <div className="w-full">
       <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -493,7 +527,7 @@ export function Student() {
               </TableRow>
             ))}
           </TableHeader>
-          <TableBody>
+          <TableBody> 
             {hasData ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow key={row.id}>
@@ -520,32 +554,64 @@ export function Student() {
           </TableBody>
         </Table>
       </div>
-      {hasData
-        ?
-        <div className="flex items-center justify-end space-x-2 py-4">
-          <div className="text-muted-foreground flex-1 text-sm">
-            {table.getFilteredSelectedRowModel().rows.length} of{" "}
-            {table.getFilteredRowModel().rows.length} row(s) selected.
-          </div>
-          <div className="space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
+     
+      {hasData ? 
+        <div className="flex justify-end py-2" >
+          <div className="flex items-center gap-2">
+            <button
+              className="border rounded p-1"
+              onClick={() => goToPage(1)}
+              disabled={page == 1}
             >
-              Previous
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
+              {'<<'}
+            </button>
+            <button
+              className="border rounded p-1"
+              onClick={() => goToPage(page - 1)}
+              disabled={page == 1}
             >
-              Next
-            </Button>
-          </div>
-        </div> : null}
+              {'<'} 
+            </button>
+            <button
+              className="border rounded p-1"
+              onClick={() => goToPage(page + 1)}
+              disabled={!studentData?.pagination?.hasNext}
+            >
+              {'>'} 
+            </button>
+            <button
+              className="border rounded p-1"
+              onClick={() => goToPage(studentData?.pagination.totalPages || 1)}
+              disabled={!studentData?.pagination?.hasNext}>
+              {'>>'}
+            </button>
+            <span className="flex items-center gap-1">
+              <div>Page</div>
+              <strong>
+                {page} of{' '}
+                {studentData?.pagination?.totalPages || 1}
+              </strong>
+            </span>
+            <select
+              value={limit}
+              onChange={e => {
+                changePageSize(Number(e.target.value))
+              }}
+            >
+              {[10, 20, 30, 40, 50].map(pageSize => (
+                <option key={pageSize} value={pageSize}>
+                  Show {pageSize}
+                </option>
+              ))}
+            </select>
+            {/* {
+              JSON.stringify(studentData?.pagination)
+            } */}
+          </div>     
+        </div>     
+       : null
+      }
+
     </div>
   )
 
