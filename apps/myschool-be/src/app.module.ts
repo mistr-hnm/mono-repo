@@ -1,7 +1,7 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
-import { RouterModule } from '@nestjs/core';
+import { APP_GUARD, RouterModule } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { routes } from './routes';
 import { env } from './lib/env';
@@ -15,6 +15,7 @@ import { CoursesModule } from './modules/courses/courses.module';
 import { StudentsModule } from './modules/students/students.module';
 import { LoggerMiddleware } from './core/middleware/logger.middleware';
 import { AuthenticationMiddleware } from './core/middleware/authentication.middleware';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
   imports: [
@@ -35,6 +36,14 @@ import { AuthenticationMiddleware } from './core/middleware/authentication.middl
       secret: env.SECRET,
       signOptions: { expiresIn: '1h' },
     }),
+    ThrottlerModule.forRoot({
+      throttlers: [
+        {
+          ttl : 60000,
+          limit : 10
+        }
+      ]
+    }),
     SharedCacheModule,
     CoursesModule,
     StudentsModule,
@@ -44,7 +53,11 @@ import { AuthenticationMiddleware } from './core/middleware/authentication.middl
   ],
   controllers: [AppController],
   providers: [
-    AppService
+    AppService,
+    {
+      provide : APP_GUARD,
+      useClass : ThrottlerGuard
+    }
   ],
 })
 
