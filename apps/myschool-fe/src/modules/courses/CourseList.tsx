@@ -1,17 +1,15 @@
 import {
   flexRender,
-  getCoreRowModel, 
-  getPaginationRowModel, 
-  useReactTable, 
+  getCoreRowModel,
+  getPaginationRowModel,
+  useReactTable,
   type ColumnDef,
   type PaginationState
 } from "@tanstack/react-table"
 import {
   AlertDialog,
-  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
-  AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
@@ -27,30 +25,23 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { useState } from "react"
-
-import * as z from 'zod/v4'
-
-import { useForm } from "react-hook-form"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
-import { useCreateMutation, useDeleteMutation, useUpdateMutation } from "@/services/mutation/course"
+import { useDeleteMutation } from "@/services/mutation/course"
 import { useGetCourses } from "@/services/queries/course"
 import { toast } from "sonner"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Route } from "@/routes/_home/courses"
-import { useMemo } from 'react';
+import { useMemo } from 'react'
 import { useNavigate } from "@tanstack/react-router"
 
 export function CourseList() {
 
   const navigate = useNavigate();
 
-  const {page, limit} =  Route.useSearch();
+  const { page, limit } = Route.useSearch();
   const [isLoading, setIsLoading] = useState(false)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
- 
-  
+
+
   const pagination = useMemo<PaginationState>(() => ({
     pageIndex: page,
     pageSize: limit,
@@ -58,38 +49,42 @@ export function CourseList() {
 
 
   const setPagination = (updaterOrValue: PaginationState | ((old: PaginationState) => PaginationState)) => {
-    const newPagination = typeof updaterOrValue === 'function' 
-      ? updaterOrValue(pagination) 
+    const newPagination = typeof updaterOrValue === 'function'
+      ? updaterOrValue(pagination)
       : updaterOrValue;
-    
+
     navigate({
       to: '/courses',
       search: {
-        page: newPagination.pageIndex + 1, 
+        page: newPagination.pageIndex + 1,
         limit: newPagination.pageSize,
       },
-      replace: true, 
+      replace: true,
     });
   }
 
-  const formSchema = z.object({
-    _id: z.string().optional(),
-    courseId: z.number().min(1, "Please enter course id"),
-    name: z.string().min(1, "Please enter name"),
-  })
+  
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: standardSchemaResolver(formSchema),
-    defaultValues: {
-      courseId: 0,
-      name: '',
-    }
-  })
-
-  const { isPending, data : courseData } = useGetCourses(pagination);
-  const createMutation = useCreateMutation();
-  const updateMutation = useUpdateMutation();
+  const { isPending, data: courseData } = useGetCourses(pagination);
+  
   const deleteMutation = useDeleteMutation();
+
+  const onDelete = async (raw: Course) => {
+    deleteMutation.mutate({ id: raw._id }, {
+        onSuccess: () => {
+            toast.success("Course added.")
+            setIsLoading(false);
+            setIsDialogOpen(false)
+        },
+        onError: (error: any) => {
+            const msg = error?.response?.data?.message?.message ?? 'Something went wrong'
+            toast.error(msg)
+            setIsLoading(false)
+            setIsDialogOpen(false)
+        }
+    });
+  }
+
 
 
   const columns: ColumnDef<Course>[] = [
@@ -130,7 +125,11 @@ export function CourseList() {
         return (
           <div className="flex justify-end ">
             <Button variant="outline" disabled={isLoading} onClick={() => {
-              onEdit(row.original);
+              // onEdit(row.original);
+              navigate({
+                to: '/course/$id',
+                params: { id: row.original._id }
+              })
             }}>
               Edit
             </Button>
@@ -145,74 +144,10 @@ export function CourseList() {
     }
   ]
 
-  const onSubmit = async () => {
-    const result = formSchema.safeParse({ ...form.getValues() });
 
-    if (!result.success) {
-      toast.error("validation failed")
-      return
-    }
-        
-    const payLoad = result.data;
-    setIsLoading(true)
-    if (payLoad?._id) {
-      const body = { courseId: payLoad.courseId, name: payLoad.name };
-      updateMutation.mutate({ id: payLoad._id, body: body }, {
-        onSuccess: () => {
-          toast.success("Course updated.")
-          setIsLoading(false);
-          setIsDialogOpen(false)
-        },
-        onError: (error: any) => {
-          console.log("error", error);
-          const msg = error?.response?.data?.message?.message ?? 'Something went wrong'
-          toast.error(msg)
-          setIsLoading(false)
-        }
-      });
-    } else {
-      createMutation.mutate(payLoad, {
-        onSuccess: () => {
-          toast.success("Course added.")
-          setIsLoading(false);
-          setIsDialogOpen(false)
-        },
-        onError: (error: any) => {
-          const msg = error?.response?.data?.message?.message ?? 'Something went wrong'
-          toast.error(msg)
-          setIsLoading(false)
-        }
-      });
-    }
-  }
+  
 
-  const onEdit = async (raw: Course) => {
-    setIsDialogOpen(true);
-    const { courseId, name, _id } = raw;
-    form.setValue('name', name);
-    form.setValue('courseId', courseId);
-    form.setValue('_id', _id);
-  }
-
-  const onDelete = async (raw: Course) => {
-    deleteMutation.mutate({ id: raw._id }, {
-      onSuccess: () => {
-        toast.success("Course added.")
-        setIsLoading(false);
-        setIsDialogOpen(false)
-      },
-      onError: (error: any) => {
-        const msg = error?.response?.data?.message?.message ?? 'Something went wrong'
-        toast.error(msg)
-        setIsLoading(false)
-        setIsDialogOpen(false)
-      }
-    })
-
-  }
-
- 
-  const goToPage = (pageNumber: number) => { 
+  const goToPage = (pageNumber: number) => {
     navigate({
       to: '/courses',
       search: {
@@ -222,9 +157,9 @@ export function CourseList() {
       replace: true,
     });
   }
-  
 
-  const changePageSize = (newPageSize: number) => { 
+
+  const changePageSize = (newPageSize: number) => {
     navigate({
       to: '/courses',
       search: {
@@ -234,7 +169,7 @@ export function CourseList() {
       replace: true,
     });
   }
- 
+
 
   const table = useReactTable({
     data: courseData?.data || [],
@@ -243,7 +178,7 @@ export function CourseList() {
     getPaginationRowModel: getPaginationRowModel(),
     manualPagination: true,
     pageCount: courseData?.pagination?.totalPages || 0,
-    state : {
+    state: {
       pagination
     },
     onPaginationChange: setPagination,
@@ -252,31 +187,30 @@ export function CourseList() {
   if (isPending) {
     return (
       <div className="flex items-center justify-center h-48">
-         <p className="font-semibold">
-         Loading
-         </p>
-         <div className="px-2">
-           <Skeleton className="h-[10px] w-[50px] rounded-full" />
-           </div>
+        <p className="font-semibold">
+          Loading
+        </p>
+        <div className="px-2">
+          <Skeleton className="h-[10px] w-[50px] rounded-full" />
+        </div>
       </div>
     );
   }
 
- 
+
   const hasData = courseData?.data && courseData?.data?.length > 0;
 
   return (
-
     <div className="w-full">
-
       <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <div className="flex justify-end my-2">
           <AlertDialogTrigger asChild className="">
             <Button variant="outline" onClick={() => {
-              setIsDialogOpen(true)
-              form.reset();
-            }
-            }>
+              navigate({
+                to: '/course/$id',
+                params : { id : 'new' }
+              });
+            }}>
               New
             </Button>
           </AlertDialogTrigger>
@@ -288,51 +222,7 @@ export function CourseList() {
           <AlertDialogDescription>
             Please fill out the form below to continue.
           </AlertDialogDescription>
-          <div className="text-muted-foreground text-sm">
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                <FormField
-                  control={form.control}
-                  name="courseId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Course Id</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Course Id"
-                          type="number"
-                          {...field}
-                          value={field.value || ""}
-                          onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : "")} // Convert to number
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Name"  {...field} value={field.value || ""} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <AlertDialogFooter>
-                  <AlertDialogCancel type="button">Cancel</AlertDialogCancel>
-                  <Button type="submit" disabled={isLoading}>
-                    {isLoading ? "Loading..." : "Submit"}
-                  </Button>
-
-                </AlertDialogFooter>
-              </form>
-            </Form>
-          </div>
+      
         </AlertDialogContent>
       </AlertDialog>
 
@@ -357,7 +247,7 @@ export function CourseList() {
             ))}
           </TableHeader>
           <TableBody>
-            { hasData  ? (
+            {hasData ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow key={row.id}>
                   {row.getVisibleCells().map((cell) => (
@@ -385,7 +275,7 @@ export function CourseList() {
       </div>
       {hasData
         ?
-        
+
         <div className="flex justify-end py-2" >
           <div className="flex items-center gap-2">
             <button
@@ -400,14 +290,14 @@ export function CourseList() {
               onClick={() => goToPage(page - 1)}
               disabled={page == 1}
             >
-              {'<'} 
+              {'<'}
             </button>
             <button
               className="border rounded p-1"
               onClick={() => goToPage(page + 1)}
               disabled={!courseData?.pagination?.hasNext}
             >
-              {'>'} 
+              {'>'}
             </button>
             <button
               className="border rounded p-1"
@@ -437,13 +327,14 @@ export function CourseList() {
             {/* {
               JSON.stringify(courseData?.pagination)
             } */}
-          </div>     
-        </div>     
-       : null
+          </div>
+        </div>
+        : null
       }
     </div>
   )
 }
+
 type Course = {
   _id: string
   courseId: number

@@ -16,3 +16,19 @@ export function useGetCourses(pagination : PaginationState) {
         }
     })
 }
+
+
+export function useGetCourseById(id : string) {
+    
+    return useQuery({
+        queryKey : ["courses",id],
+        retry : false,
+        queryFn : async () => {
+           const response = await axiosInstance.get(`${url}/courses/${id}`)    
+             
+           if(response.status !== 200) throw await response.data; 
+           return response.data;
+        }
+    })
+}
+

@@ -30,7 +30,7 @@ function Home() {
 
               <NavigationMenuItem>
                 <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
-                  <Link to="/courses">
+                  <Link to="/courses" search={{limit : 10, page : 1}}  >
                     Courses
                   </Link>
                 </NavigationMenuLink>
@@ -38,11 +38,12 @@ function Home() {
 
               <NavigationMenuItem>
                 <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
-                  <Link to="/students">
+                  <Link to="/students" search={{limit : 10, page : 1}}  >
                     Student
                   </Link>
                 </NavigationMenuLink>
-              </NavigationMenuItem>
+              </NavigationMenuItem>  
+              
             </NavigationMenuList>
           </NavigationMenu>
 

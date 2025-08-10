@@ -16,3 +16,18 @@ export function useGetStudents(pagination : PaginationState) {
         }
     })
 }
+
+
+export function useGetStudentById(id : string) {
+    
+    return useQuery({
+        queryKey : ["students",id],
+        retry : false,
+        queryFn : async () => {
+           const response = await axiosInstance.get(`${url}/students/${id}`)    
+             
+           if(response.status !== 200) throw await response.data; 
+           return response.data;
+        }
+    })
+}

@@ -17,6 +17,8 @@ import { Route as HomeCoursesRouteImport } from './routes/_home/courses'
 import { Route as HomeAboutRouteImport } from './routes/_home/about'
 import { Route as AuthSignupRouteImport } from './routes/_auth/signup'
 import { Route as AuthLoginRouteImport } from './routes/_auth/login'
+import { Route as HomeStudentIdRouteImport } from './routes/_home/student/$id'
+import { Route as HomeCourseIdRouteImport } from './routes/_home/course/$id'
 
 const HomeRoute = HomeRouteImport.update({
   id: '/_home',
@@ -56,6 +58,16 @@ const AuthLoginRoute = AuthLoginRouteImport.update({
   path: '/login',
   getParentRoute: () => AuthRoute,
 } as any)
+const HomeStudentIdRoute = HomeStudentIdRouteImport.update({
+  id: '/student/$id',
+  path: '/student/$id',
+  getParentRoute: () => HomeRoute,
+} as any)
+const HomeCourseIdRoute = HomeCourseIdRouteImport.update({
+  id: '/course/$id',
+  path: '/course/$id',
+  getParentRoute: () => HomeRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/login': typeof AuthLoginRoute
@@ -64,6 +76,8 @@ export interface FileRoutesByFullPath {
   '/courses': typeof HomeCoursesRoute
   '/students': typeof HomeStudentsRoute
   '/': typeof HomeIndexRoute
+  '/course/$id': typeof HomeCourseIdRoute
+  '/student/$id': typeof HomeStudentIdRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof AuthLoginRoute
@@ -72,6 +86,8 @@ export interface FileRoutesByTo {
   '/courses': typeof HomeCoursesRoute
   '/students': typeof HomeStudentsRoute
   '/': typeof HomeIndexRoute
+  '/course/$id': typeof HomeCourseIdRoute
+  '/student/$id': typeof HomeStudentIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -83,12 +99,30 @@ export interface FileRoutesById {
   '/_home/courses': typeof HomeCoursesRoute
   '/_home/students': typeof HomeStudentsRoute
   '/_home/': typeof HomeIndexRoute
+  '/_home/course/$id': typeof HomeCourseIdRoute
+  '/_home/student/$id': typeof HomeStudentIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/login' | '/signup' | '/about' | '/courses' | '/students' | '/'
+  fullPaths:
+    | '/login'
+    | '/signup'
+    | '/about'
+    | '/courses'
+    | '/students'
+    | '/'
+    | '/course/$id'
+    | '/student/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/login' | '/signup' | '/about' | '/courses' | '/students' | '/'
+  to:
+    | '/login'
+    | '/signup'
+    | '/about'
+    | '/courses'
+    | '/students'
+    | '/'
+    | '/course/$id'
+    | '/student/$id'
   id:
     | '__root__'
     | '/_auth'
@@ -99,6 +133,8 @@ export interface FileRouteTypes {
     | '/_home/courses'
     | '/_home/students'
     | '/_home/'
+    | '/_home/course/$id'
+    | '/_home/student/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -164,6 +200,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthLoginRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/_home/student/$id': {
+      id: '/_home/student/$id'
+      path: '/student/$id'
+      fullPath: '/student/$id'
+      preLoaderRoute: typeof HomeStudentIdRouteImport
+      parentRoute: typeof HomeRoute
+    }
+    '/_home/course/$id': {
+      id: '/_home/course/$id'
+      path: '/course/$id'
+      fullPath: '/course/$id'
+      preLoaderRoute: typeof HomeCourseIdRouteImport
+      parentRoute: typeof HomeRoute
+    }
   }
 }
 
@@ -184,6 +234,8 @@ interface HomeRouteChildren {
   HomeCoursesRoute: typeof HomeCoursesRoute
   HomeStudentsRoute: typeof HomeStudentsRoute
   HomeIndexRoute: typeof HomeIndexRoute
+  HomeCourseIdRoute: typeof HomeCourseIdRoute
+  HomeStudentIdRoute: typeof HomeStudentIdRoute
 }
 
 const HomeRouteChildren: HomeRouteChildren = {
@@ -191,6 +243,8 @@ const HomeRouteChildren: HomeRouteChildren = {
   HomeCoursesRoute: HomeCoursesRoute,
   HomeStudentsRoute: HomeStudentsRoute,
   HomeIndexRoute: HomeIndexRoute,
+  HomeCourseIdRoute: HomeCourseIdRoute,
+  HomeStudentIdRoute: HomeStudentIdRoute,
 }
 
 const HomeRouteWithChildren = HomeRoute._addFileChildren(HomeRouteChildren)
