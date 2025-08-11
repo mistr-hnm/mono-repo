@@ -13,6 +13,20 @@ export function useCreateMutation() {
      },
      onSuccess :() => {
       queryClient.invalidateQueries({ queryKey : ["courses"]})
+     }
+  })
+}
+
+
+export function useSearchMutation() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn : async (body :  any) => {
+        const response = await axiosInstance.post(`${url}/courses/search`, body)
+        return response.data.data;
+    },
+    onSuccess :(data) => {
+      queryClient.setQueryData(['courses'], data);
     }
   })
 }

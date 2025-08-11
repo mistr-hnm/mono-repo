@@ -84,8 +84,16 @@ export class StudentsService {
         ])
 
         if (!students || students.length === 0) {
-            throw new NotFoundException("Student not found.")
+            return PaginationUtil.paginate(
+                    true, 
+                    "Student fetched successfully",
+                    [],
+                    total,
+                    page,
+                    limit
+                );
         }
+        
         const includeBuffers = true
         const processStudent = async (student) => {
             let picture = student.picture;

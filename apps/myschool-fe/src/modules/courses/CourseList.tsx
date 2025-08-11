@@ -6,14 +6,6 @@ import {
   type ColumnDef,
   type PaginationState
 } from "@tanstack/react-table"
-import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -26,7 +18,7 @@ import {
 } from "@/components/ui/table"
 import { useState } from "react"
 import { useDeleteMutation } from "@/services/mutation/course"
-import { useGetCourses } from "@/services/queries/course"
+import { useGetCourses, useSearchCourse } from "@/services/queries/course"
 import { toast } from "sonner"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Route } from "@/routes/_home/courses"
@@ -39,8 +31,6 @@ export function CourseList() {
 
   const { page, limit } = Route.useSearch();
   const [isLoading, setIsLoading] = useState(false)
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
-
 
   const pagination = useMemo<PaginationState>(() => ({
     pageIndex: page,
@@ -63,29 +53,45 @@ export function CourseList() {
     });
   }
 
-  
+  let courseData :any, isPending = false
 
-  const { isPending, data: courseData } = useGetCourses(pagination);
-  
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const queryResult = useGetCourses(searchTerm, pagination);
+  if(searchTerm === ""){
+    console.log("searchTerm if 1==>",searchTerm);
+    isPending  = queryResult.isPending;
+    courseData = queryResult.data || courseData;
+  }
+
+  const body = { page, limit, searchTerm, sortBy: "createdAt", sortOrder: "desc" };
+  const searchqueryResult = useSearchCourse(searchTerm, body);
+ 
+  if(searchTerm !== ""){
+    console.log("searchTerm if 2==>",searchTerm);
+    console.log("searchTerm if 2-pending==>",searchqueryResult.isPending);
+    console.log("searchTerm if 2-data==>",searchqueryResult.data);
+    isPending = searchqueryResult.isPending;
+    courseData = searchqueryResult?.data;
+  }
+  console.log("searchTerm==>",searchTerm);
+  console.log("courseData==>",courseData);
+
   const deleteMutation = useDeleteMutation();
 
   const onDelete = async (raw: Course) => {
     deleteMutation.mutate({ id: raw._id }, {
-        onSuccess: () => {
-            toast.success("Course added.")
-            setIsLoading(false);
-            setIsDialogOpen(false)
-        },
-        onError: (error: any) => {
-            const msg = error?.response?.data?.message?.message ?? 'Something went wrong'
-            toast.error(msg)
-            setIsLoading(false)
-            setIsDialogOpen(false)
-        }
+      onSuccess: () => {
+        toast.success("Course added.")
+        setIsLoading(false);
+      },
+      onError: (error: any) => {
+        const msg = error?.response?.data?.message?.message ?? 'Something went wrong'
+        toast.error(msg)
+        setIsLoading(false)
+      }
     });
   }
-
-
 
   const columns: ColumnDef<Course>[] = [
     {
@@ -144,9 +150,6 @@ export function CourseList() {
     }
   ]
 
-
-  
-
   const goToPage = (pageNumber: number) => {
     navigate({
       to: '/courses',
@@ -200,31 +203,45 @@ export function CourseList() {
 
   const hasData = courseData?.data && courseData?.data?.length > 0;
 
+
+  function debounce(func: any) {
+    let timeoutId: any;
+
+    return function (inputValue: any) {
+      clearTimeout(timeoutId);
+      
+      timeoutId = setTimeout(() => {
+        func(inputValue);
+      }, 1000)
+    }
+  }
+
+  // Create debounced version
+  const debouncedSearch = debounce((value: any) => {
+     console.log("api calling now", value) // api calling
+     setSearchTerm(value);   
+  })
+
   return (
     <div className="w-full">
-      <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <div className="flex justify-end my-2">
-          <AlertDialogTrigger asChild className="">
-            <Button variant="outline" onClick={() => {
-              navigate({
-                to: '/course/$id',
-                params : { id : 'new' }
-              });
-            }}>
-              New
-            </Button>
-          </AlertDialogTrigger>
-        </div>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Course form</AlertDialogTitle>
-          </AlertDialogHeader>
-          <AlertDialogDescription>
-            Please fill out the form below to continue.
-          </AlertDialogDescription>
-      
-        </AlertDialogContent>
-      </AlertDialog>
+      <div className="flex justify-end items-center my-2">
+        <input
+          type="text"
+          placeholder="Search course..."
+          className="border rounded p-2 w-1/5 mr-4"
+          onChange={(e) => {
+            debouncedSearch(e.target.value);
+          }}
+        />
+        <Button variant="outline" onClick={() => {
+          navigate({
+            to: '/course/$id',
+            params: { id: 'new' }
+          });
+        }}>
+          New
+        </Button>
+      </div>
 
       <div className="rounded-md border">
         <Table>

@@ -1,6 +1,6 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsOptional, IsNumber, IsPositive, Min } from 'class-validator';
-import { GetPaginationDto } from 'src/lib/pagintation.util';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsString, IsNotEmpty, IsOptional, IsNumber, IsPositive, Min, IsEnum } from 'class-validator';
+import { GetPaginationDto, PaginationDto } from 'src/lib/pagintation.util';
  export class CreateCourseDto {
     @ApiProperty({ example: 101, description: "The unique ID of the course" })
     @IsNumber()
@@ -220,4 +220,62 @@ export class DeleteCourseResponseDto {
 
     @ApiProperty({ example: 'Course deleted successfully', description: 'A message indicating the outcome of the deletion' })
     message: string;
+}
+
+
+export enum CourseSortOrder {
+    ASC = 'asc',
+    DESC = 'desc'
+}
+
+export enum CourseSortField {
+    CREATED_AT = 'createdAt',
+    NAME = 'name',
+    COURSE_ID = 'courseId'
+}
+
+
+export class SearchCoursesDto extends PaginationDto {
+    @ApiPropertyOptional({ 
+        description: "Search term for course name or courseId",
+        example: "computer science" 
+    })
+    @IsOptional()
+    @IsString()
+    searchTerm?: string;
+
+    @ApiPropertyOptional({ 
+        description: "Sort field",
+        enum: CourseSortField,
+        default: CourseSortField.CREATED_AT 
+    })
+    @IsOptional()
+    @IsEnum(CourseSortField)
+    sortBy?: CourseSortField = CourseSortField.CREATED_AT;
+
+    @ApiPropertyOptional({ 
+        description: "Sort order",
+        enum: CourseSortOrder,
+        default: CourseSortOrder.DESC 
+    })
+    @IsOptional()
+    @IsEnum(CourseSortOrder)
+    sortOrder?: CourseSortOrder = CourseSortOrder.DESC;
+}
+
+export class SearchCourseDataDto {
+    @ApiProperty({ example: "60b5d5f5e4b0c8a5d8e5f5a5" })
+    _id: string;
+
+    @ApiProperty({ example: "CS101" })
+    courseId: string;
+
+    @ApiProperty({ example: "Computer Science Fundamentals" })
+    name: string;
+
+    @ApiPropertyOptional({ example: "Introduction to computer science concepts" })
+    description?: string;
+
+    @ApiProperty({ example: "Mon Jan 01 2024" })
+    createdAt: string;
 }

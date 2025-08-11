@@ -14,7 +14,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table" 
+} from "@/components/ui/table"
 import { useMemo } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useGetStudents } from "@/services/queries/student"
@@ -237,7 +237,23 @@ export function StudentList() {
   return (
     <div className="w-full">
 
-      <div className="flex justify-end my-2">
+      <div className="flex justify-end items-center my-2">
+        <input
+          type="text"
+          placeholder="Search students..."
+          className="border rounded p-2 w-1/3"
+          onChange={(e) => {
+            navigate({
+              to: '/students',
+              search: {
+                page: 1,
+                limit,
+                // search: e.target.value,
+              },
+              replace: true,
+            });
+          }}
+        />
         <Button variant="outline" onClick={() => {
           navigate({
             to: '/student/$id',
