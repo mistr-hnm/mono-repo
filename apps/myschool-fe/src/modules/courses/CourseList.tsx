@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/table"
 import { useState } from "react"
 import { useDeleteMutation } from "@/services/mutation/course"
-import { useGetCourses, useSearchCourse } from "@/services/queries/course"
+import { useGetCourses } from "@/services/queries/course"
 import { toast } from "sonner"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Route } from "@/routes/_home/courses"
@@ -53,29 +53,9 @@ export function CourseList() {
     });
   }
 
-  let courseData :any, isPending = false
-
   const [searchTerm, setSearchTerm] = useState("");
 
-  const queryResult = useGetCourses(searchTerm, pagination);
-  if(searchTerm === ""){
-    console.log("searchTerm if 1==>",searchTerm);
-    isPending  = queryResult.isPending;
-    courseData = queryResult.data || courseData;
-  }
-
-  const body = { page, limit, searchTerm, sortBy: "createdAt", sortOrder: "desc" };
-  const searchqueryResult = useSearchCourse(searchTerm, body);
- 
-  if(searchTerm !== ""){
-    console.log("searchTerm if 2==>",searchTerm);
-    console.log("searchTerm if 2-pending==>",searchqueryResult.isPending);
-    console.log("searchTerm if 2-data==>",searchqueryResult.data);
-    isPending = searchqueryResult.isPending;
-    courseData = searchqueryResult?.data;
-  }
-  console.log("searchTerm==>",searchTerm);
-  console.log("courseData==>",courseData);
+  const {isPending , data : courseData} = useGetCourses(pagination,searchTerm);
 
   const deleteMutation = useDeleteMutation();
 
@@ -218,8 +198,7 @@ export function CourseList() {
 
   // Create debounced version
   const debouncedSearch = debounce((value: any) => {
-     console.log("api calling now", value) // api calling
-     setSearchTerm(value);   
+     setSearchTerm(value);
   })
 
   return (

@@ -44,22 +44,52 @@ export class CoursesService {
         };
     }
 
-    async findAll(paginationDto: PaginationDto): Promise<GetCoursesResponseDto> {
-        const { page, limit } = paginationDto;
+    async findAll(searchDto: SearchCoursesDto): Promise<GetCoursesResponseDto> {
+        const { page, 
+            limit, 
+            searchTerm, 
+            sortBy = CourseSortField.CREATED_AT,
+            sortOrder = CourseSortOrder.DESC
+         } = searchDto;
         const skip = PaginationUtil.getSkip(page, limit);
 
-        const [courses, total] = await Promise.all([
-            this.courseModel
-                .find()
-                .skip(skip)
-                .limit(limit)
-                .sort({ _id: 1 })
-                .exec(),
+        // Build query filters
+        let filters: any = {};
 
-            this.courseModel
-                .countDocuments()
-                .exec()
-        ])
+
+        // Text search across multiple fields
+        if (searchTerm) {
+            const escaped = searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const searchValue = new RegExp(escaped, 'i');
+            const orConditions : any = [
+                { name: searchValue },
+                { description: searchValue }
+            ];
+
+            const numValue = Number(searchTerm);
+            if (!isNaN(numValue)) {
+                orConditions.push({ courseId: numValue });
+            }
+
+            filters = { $or: orConditions };
+        }
+
+        // Build sort object
+        const sortObject: any = {};
+        sortObject[sortBy] = sortOrder === CourseSortOrder.ASC ? 1 : -1;
+
+        const [courses, total] = await Promise.all([
+                this.courseModel
+                    .find(filters)
+                    .skip(skip)
+                    .limit(limit)
+                    .sort(sortObject)
+                    .exec(),
+    
+                this.courseModel
+                    .countDocuments(filters)
+                    .exec()
+            ]);
 
         if (!courses || courses.length === 0) {
             return PaginationUtil.paginate(
@@ -90,94 +120,7 @@ export class CoursesService {
              limit
          );
     }
-
-
-    async search(searchDto: SearchCoursesDto): Promise<GetCoursesResponseDto> {
-        const { 
-            page, 
-            limit, 
-            searchTerm, 
-            sortBy = CourseSortField.CREATED_AT,
-            sortOrder = CourseSortOrder.DESC
-        } = searchDto;
     
-        const skip = PaginationUtil.getSkip(page, limit);
-    
-        // Build query filters
-        let filters: any = {};
-
-    
-        // Text search across multiple fields
-        if (searchTerm) {
-            const escaped = searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            const searchValue = new RegExp(escaped, 'i');
-            const orConditions : any = [
-                { name: searchValue },
-                { description: searchValue }
-            ];
-
-            const numValue = Number(searchTerm);
-            if (!isNaN(numValue)) {
-                orConditions.push({ courseId: numValue });
-            }
-
-            filters = { $or: orConditions };
-        }
-    
-        // Build sort object
-        const sortObject: any = {};
-        sortObject[sortBy] = sortOrder === CourseSortOrder.ASC ? 1 : -1;
-    
-        try {
-            const [courses, total] = await Promise.all([
-                this.courseModel
-                    .find(filters)
-                    .skip(skip)
-                    .limit(limit)
-                    .sort(sortObject)
-                    .exec(),
-    
-                this.courseModel
-                    .countDocuments(filters)
-                    .exec()
-            ]);
-    
-            if (!courses || courses.length === 0) {
-                return PaginationUtil.paginate(
-                    true,
-                    "Courses search completed successfully",
-                    [],
-                    total,
-                    page,
-                    limit
-                );
-            }
-    
-            // Transform courses data
-            const data = courses.map((course: Course) => ({
-                _id: course._id.toString(),
-                courseId: course.courseId,
-                name: course.name,
-                description: course.description,
-                createdAt: course.createdAt.toDateString()
-            }));
-
-            return PaginationUtil.paginate(
-                true,
-                "Courses search completed successfully",
-                data,
-                total,
-                page,
-                limit
-            );
-    
-        } catch (error) {
-            console.error('Error in course search:', error);
-            throw new BadRequestException('Error occurred while searching courses');
-        }
-    }
-
-
     async findById(id: string): Promise<GetCourseResponseDto> {
 
         const course = await this.courseModel.findById(id).exec();

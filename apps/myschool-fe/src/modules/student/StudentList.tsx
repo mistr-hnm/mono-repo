@@ -15,7 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useGetStudents } from "@/services/queries/student"
 import { useDeleteMutation } from "@/services/mutation/student"
@@ -35,7 +35,9 @@ export function StudentList() {
     pageSize: limit,
   }), [page, limit]);
 
-  const { data: studentData, isPending } = useGetStudents(pagination)
+  const [searchTerm, setSearchTerm] = useState("");
+  
+  const { data: studentData, isPending } = useGetStudents(searchTerm,pagination)
 
   const setPagination = (updaterOrValue: PaginationState | ((old: PaginationState) => PaginationState)) => {
     const newPagination = typeof updaterOrValue === 'function'
@@ -217,6 +219,22 @@ export function StudentList() {
     }
   }
 
+  function debounce(func: any) {
+    let timeoutId: any;
+
+    return function (inputValue: any) {
+      clearTimeout(timeoutId);
+      
+      timeoutId = setTimeout(() => {
+        func(inputValue);
+      }, 1000)
+    }
+  }
+
+  const debouncedSearch = debounce((value: any) => {
+     setSearchTerm(value);   
+  })
+
 
   if (isPending) {
     return (
@@ -237,21 +255,13 @@ export function StudentList() {
   return (
     <div className="w-full">
 
-      <div className="flex justify-end items-center my-2">
+    <div className="flex justify-end items-center my-2">
         <input
           type="text"
-          placeholder="Search students..."
-          className="border rounded p-2 w-1/3"
+          placeholder="Search student..."
+          className="border rounded p-2 w-1/5 mr-4"
           onChange={(e) => {
-            navigate({
-              to: '/students',
-              search: {
-                page: 1,
-                limit,
-                // search: e.target.value,
-              },
-              replace: true,
-            });
+            debouncedSearch(e.target.value);
           }}
         />
         <Button variant="outline" onClick={() => {

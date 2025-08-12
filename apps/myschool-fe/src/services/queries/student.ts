@@ -4,12 +4,14 @@ import type { PaginationState } from "@tanstack/react-table";
 
 const url = `${import.meta.env.VITE_BE_BASE_URL}`;
 
-export function useGetStudents(pagination : PaginationState) {
+export function useGetStudents(searchText : string ,pagination : PaginationState) {
     return useQuery({
-        queryKey : ["students",pagination],
+        queryKey : ["students", pagination, searchText],
         retry : false,
         queryFn : async () => {
-           const response = await axiosInstance.get(`${url}/students?page=${pagination.pageIndex}&limit=${pagination.pageSize}`) 
+            let uri = `${url}/students?page=${pagination.pageIndex}&limit=${pagination.pageSize}`;
+            if(searchText) uri += `&searchTerm=${searchText}`;
+           const response = await axiosInstance.get(uri) 
            
            if(response.status !== 200) throw await response.data; 
            return response.data;

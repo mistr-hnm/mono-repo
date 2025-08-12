@@ -29,7 +29,7 @@ export function StudentForm() {
     const createMutation = useCreateMutation()
     const updateMutation = useUpdateMutation()
 
-    const { data: courseData } = useGetCourses({ pageIndex: 1, pageSize: 10 });
+    const { data: courseData } = useGetCourses({ pageIndex: 1, pageSize: 25 });
 
     const navigate = useNavigate()
 

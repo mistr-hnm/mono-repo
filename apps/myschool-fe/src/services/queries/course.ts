@@ -4,17 +4,19 @@ import type { PaginationState } from "@tanstack/react-table";
 
 const url = `${import.meta.env.VITE_BE_BASE_URL}`;
 
-export function useGetCourses(searchText : string, pagination : PaginationState) {
+export function useGetCourses(pagination : PaginationState, searchText ?: string) {
     return useQuery({
-        queryKey : ["courses",pagination],
+        queryKey : ["courses",pagination ,searchText],
         retry : false,
         queryFn : async () => {
-           const response = await axiosInstance.get(`${url}/courses?page=${pagination.pageIndex}&limit=${pagination.pageSize}`)    
+            let uri = `${url}/courses?page=${pagination.pageIndex}&limit=${pagination.pageSize}`;
+            if(searchText) uri += `&searchTerm=${searchText}`;
+            
+            const response = await axiosInstance.get(uri)    
              
            if(response.status !== 200) throw await response.data; 
            return response.data;
-        },
-        enabled : searchText === ""
+        }
     })
 }
 
@@ -30,23 +32,6 @@ export function useGetCourseById(id : string) {
            if(response.status !== 200) throw await response.data; 
            return response.data;
         }
-    })
-}
-
-
-export function useSearchCourse(searchText : any, body: any) {
-    console.log("body==>",body);
-    
-    return useQuery({
-        queryKey : ["courses",searchText],
-        retry : false,
-        queryFn : async () => {
-           const response = await axiosInstance.post(`${url}/courses/search`, body)
-           console.log("response",response);
-           if(response.status !== 200) throw await response.data; 
-           return response.data;
-        },
-        enabled : searchText !== ""
     })
 }
 

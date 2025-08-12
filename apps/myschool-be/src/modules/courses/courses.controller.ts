@@ -40,30 +40,11 @@ export class CoursesController {
     @ApiHeaders([signture])
     @ApiOkResponse({ description: "Courses fetched successfully", type: GetCoursesResponseDto })
     @ApiUnauthorizedResponse({ description: "Unauthorized", type : UnauthorizedResponseDto })
-    @ApiNotFoundResponse({ description: "Course not found." , type : NotFoundResponseDto })
     @Get()
-    async findAll(@Query() paginationDto : PaginationDto) {
-        return await this.courseService.findAll(paginationDto);
+    async findAll(@Query() searchDto : SearchCoursesDto) {
+        return await this.courseService.findAll(searchDto);
     }
 
-    // Add this method to your CoursesController class
-    @ApiOperation({ summary: "Search courses with filters" })
-    @ApiBody({
-        description: "Search criteria for courses",
-        type: SearchCoursesDto
-    })
-    @ApiHeaders([signture])
-    @ApiOkResponse({ description: "Courses search completed successfully", type: GetCoursesResponseDto })
-    @ApiBadRequestResponse({ description: "Bad Request", type: BadRequestResponseDto })
-    @ApiInternalServerErrorResponse({ description: "Internal server error", type: InternalServerErrorResponseDto })
-    @ApiUnauthorizedResponse({ description: "Unauthorized", type: UnauthorizedResponseDto })
-    @Post('search')
-    async search(@Body() searchDto: SearchCoursesDto) {
-        return await this.courseService.search(searchDto);
-    }
-
-    
-    
 
     @ApiOperation({ summary: "Get course by ID" })
     @ApiParam({ name: 'id', description: "ID of the course to retrieve.", type: String, format: 'uuid' })

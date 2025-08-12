@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Student, StudentDocument } from './schemas/student.schema';
-import { Model } from 'mongoose'; 
+import { Model, Types } from 'mongoose'; 
 import {
     CreateStudentDto,
     CreateStudentResponseDto,
@@ -10,7 +10,10 @@ import {
     GetStudentResponseDto,
     GetStudentsResponseDto,
     DeleteStudentResponseDto,
-    GetAllStudentsDto
+    GetAllStudentsDto,
+    SearchStudentsDto,
+    StudentSortField,
+    StudentSortOrder
 } from './schemas/student.dto';
 import { Course, CourseDocument } from '../courses/schemas/course.schema';
 import { FileService } from '../file/file.service';
@@ -33,7 +36,9 @@ export class StudentsService {
             throw new BadRequestException("Student with this enrollment number already exists.");
         }
 
-        const course = await this.courseModel.findById(createStudentDto.enrollmentCourse).exec();
+        const id = new Types.ObjectId(createStudentDto.enrollmentCourse);
+        const course = await this.courseModel.findById(id).exec();
+        
         if (!course) {
             throw new BadRequestException("Enrollment course not found.");
         }
@@ -64,22 +69,52 @@ export class StudentsService {
 
     }
 
-    async findAll(paginationDto: PaginationDto): Promise<GetStudentsResponseDto> {
-        const { page, limit } = paginationDto;
+    async findAll(searchDto: SearchStudentsDto): Promise<GetStudentsResponseDto> {
+            const { page, 
+                    limit, 
+                    searchTerm, 
+                    sortBy = StudentSortField.CREATED_AT,
+                    sortOrder = StudentSortOrder.DESC
+                 } = searchDto;
+       
         const skip = PaginationUtil.getSkip(page, limit);
+        
+        // Build query filters
+        let filters: any = {};
+
+         // Build sort object
+        const sortObject: any = {};
+        sortObject[sortBy] = sortOrder === StudentSortOrder.ASC ? 1 : -1;
+
+        // Text search across multiple fields
+        if (searchTerm) {
+            const escaped = searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const searchValue = new RegExp(escaped, 'i');
+            const orConditions : any = [
+                { fullname: searchValue },
+                { description: searchValue }
+            ];
+
+            const numValue = Number(searchTerm);
+            if (!isNaN(numValue)) {
+                orConditions.push({ enrollmentNumber: numValue });
+            }
+
+            filters = { $or: orConditions };
+        }
 
         const [students, total] = await Promise.all([
             this.studentModel
-                .find()
+                .find(filters)
                 .populate('enrollmentCourse', ['_id', 'courseId', 'name', 'description'])
                 .populate('picture',['_id','key'])
                 .skip(skip)
                 .limit(limit)
-                .sort({ _id: 1 })
+                .sort(sortObject)
                 .exec(),
 
             this.studentModel
-                .countDocuments()
+                .countDocuments(filters)
                 .exec()
         ])
 

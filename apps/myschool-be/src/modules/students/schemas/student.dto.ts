@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
     IsString,
     IsNotEmpty,
@@ -7,9 +7,10 @@ import {
     Min,
     IsDateString, 
     IsMongoId, 
-    IsPositive, 
+    IsPositive,
+    IsEnum, 
 } from 'class-validator';
-import { GetPaginationDto } from 'src/lib/pagintation.util';
+import { GetPaginationDto, PaginationDto } from 'src/lib/pagintation.util';
  
 class StudentEnrolledCourseResponseDto {
     @ApiProperty({ example: '60c72b2f9b1e8b0015b0e4d7', description: 'The MongoDB ObjectId of the enrolled course' })
@@ -354,4 +355,46 @@ export class DeleteStudentResponseDto {
 
     @ApiProperty({ example: 'Student deleted successfully', description: 'A message indicating the outcome of the deletion' })
     message: string;
+}
+
+
+
+
+export enum StudentSortOrder {
+    ASC = 'asc',
+    DESC = 'desc'
+}
+
+export enum StudentSortField {
+    CREATED_AT = 'createdAt',
+    NAME = 'name',
+    COURSE_ID = 'courseId'
+}
+
+export class SearchStudentsDto extends PaginationDto {
+    @ApiPropertyOptional({ 
+        description: "Search term for course name or courseId",
+        example: "computer science" 
+    })
+    @IsOptional()
+    @IsString()
+    searchTerm?: string;
+    
+    @ApiPropertyOptional({ 
+        description: "Sort field",
+        enum: StudentSortField,
+        default: StudentSortField.CREATED_AT 
+    })
+    @IsOptional()
+    @IsEnum(StudentSortField)
+    sortBy?: StudentSortField = StudentSortField.CREATED_AT;
+
+    @ApiPropertyOptional({ 
+        description: "Sort order",
+        enum: StudentSortOrder,
+        default: StudentSortOrder.DESC 
+    })
+    @IsOptional()
+    @IsEnum(StudentSortOrder)
+    sortOrder?: StudentSortOrder = StudentSortOrder.DESC;
 }
