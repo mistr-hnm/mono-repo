@@ -82,7 +82,7 @@ export function StudentForm() {
 
         if(studentData?.data && !hasSetInitialValues){
             const { _id, enrollmentNumber, fullname, dateofbirth, enrollmentCourse, } = studentData?.data;
-            console.log("new Date(dateofbirth)",new Date(dateofbirth));
+            
             form.setValue('enrollmentNumber', enrollmentNumber)
             form.setValue('fullname', fullname)
             form.setValue('_id', _id)

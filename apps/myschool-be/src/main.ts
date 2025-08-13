@@ -28,8 +28,7 @@ async function bootstrap() {
       bearerFormat: 'JWT',
       in : 'header',
       name : 'Authorization', 
-      flows : {
-      }
+      flows : { }
     },
       'Authentication'
     )

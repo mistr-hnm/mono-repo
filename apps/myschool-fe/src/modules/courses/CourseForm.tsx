@@ -45,7 +45,7 @@ export function CourseForm() {
         isPending = queryResult.isPending;
         courseData = queryResult.data || courseData;
 
-        console.log("courseData",courseData);
+        
 
         form.setValue('name', courseData?.data?.name);
         form.setValue('courseId', courseData?.data?.courseId);

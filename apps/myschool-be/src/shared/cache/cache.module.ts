@@ -24,9 +24,5 @@ import { CacheableMemory } from 'cacheable';
     providers: [CacheService],
     exports: [CacheService, CacheModule]
 })
-export class SharedCacheModule {
-    constructor() {
-        console.log("SharedCacheModule");
-    }
-}
+export class SharedCacheModule {}
 

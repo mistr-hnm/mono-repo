@@ -1,5 +1,5 @@
 import { axiosInstance } from "@/utils/interceptor";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import type { PaginationState } from "@tanstack/react-table";
 
 const url = `${import.meta.env.VITE_BE_BASE_URL}`;
@@ -16,7 +16,8 @@ export function useGetCourses(pagination : PaginationState, searchText ?: string
              
            if(response.status !== 200) throw await response.data; 
            return response.data;
-        }
+        },
+        placeholderData : keepPreviousData
     })
 }
 
