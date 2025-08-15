@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsEmail, IsNotEmpty, IsOptional, isEmpty } from 'class-validator';
-import { GetPaginationDto } from 'src/lib/pagintation.util';
+import { GetPaginationDto } from 'src/lib/paginatation.util';
 
 export class LoginUserDto {
 

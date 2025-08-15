@@ -8,7 +8,7 @@ import { JwtService } from '@nestjs/jwt';
 import { PermissionService } from '../permission/permission.service';
 import { CacheService } from '../../shared/cache/cache.service';
 import { CreateUserDto, CreateUserResponseDto, DeleteUserResponseDto, GetUserResponseDto, GetUsersResponseDto, LoginUserDto, LoginUserResponseDto, UpdateUserDto, UpdateUserResponseDto } from './schemas/user.dto';
-import { PaginationDto, PaginationUtil } from 'src/lib/pagintation.util';
+import { PaginationDto, PaginationUtil } from 'src/lib/paginatation.util';
 
 @Injectable()
 export class UserService {

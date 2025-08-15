@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsNotEmpty, IsOptional, IsArray, ArrayUnique, IsMongoId, IsNumber, Min } from 'class-validator';
-import { GetPaginationDto } from 'src/lib/pagintation.util';
+import { GetPaginationDto } from 'src/lib/paginatation.util';
  
 export class CreatePermissionDto {
     @ApiProperty({ example: "users", description: "The module to which this permission applies (e.g., 'users', 'products', 'settings')" })

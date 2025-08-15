@@ -14,7 +14,7 @@ import {
     CourseSortField,
     CourseSortOrder
 } from './schemas/course.dto';
-import { PaginationDto, PaginationResult, PaginationUtil } from 'src/lib/pagintation.util';
+import { PaginationUtil } from '../../lib/paginatation.util';
 
 @Injectable()
 export class CoursesService {

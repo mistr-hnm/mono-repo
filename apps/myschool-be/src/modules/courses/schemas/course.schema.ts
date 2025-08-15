@@ -1,7 +1,7 @@
 
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
-import { BaseSchema } from 'src/core/meta/base.schema';
+import { BaseSchema } from '../../../core/meta/base.schema';
 @Schema({ timestamps : true})
 export class Course extends BaseSchema {
 

@@ -13,7 +13,7 @@ import {
 } from './schemas/student.dto'; 
 import { signture } from 'src/core/meta/global.header'; 
 import { BadRequestResponseDto, InternalServerErrorResponseDto, NotFoundResponseDto, UnauthorizedResponseDto } from 'src/lib/global.response';
-import { PaginationDto } from 'src/lib/pagintation.util';
+import { PaginationDto } from 'src/lib/paginatation.util';
 
 @Controller()
 export class StudentsController {

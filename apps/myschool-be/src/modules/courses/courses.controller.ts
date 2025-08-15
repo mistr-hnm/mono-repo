@@ -11,9 +11,9 @@ import {
     DeleteCourseResponseDto,
     SearchCoursesDto,
 } from './schemas/course.dto';
-import { signture } from 'src/core/meta/global.header';
-import { BadRequestResponseDto, InternalServerErrorResponseDto, NotFoundResponseDto, UnauthorizedResponseDto } from 'src/lib/global.response';
-import { PaginationDto } from 'src/lib/pagintation.util';
+import { signture } from '../../core/meta/global.header';
+import { BadRequestResponseDto, InternalServerErrorResponseDto, NotFoundResponseDto, UnauthorizedResponseDto } from '../../lib/global.response';
+
 
 @Controller() 
 export class CoursesController {

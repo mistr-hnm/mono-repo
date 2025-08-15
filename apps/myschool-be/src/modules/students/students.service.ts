@@ -17,7 +17,7 @@ import {
 } from './schemas/student.dto';
 import { Course, CourseDocument } from '../courses/schemas/course.schema';
 import { FileService } from '../file/file.service';
-import { PaginationDto, PaginationUtil } from 'src/lib/pagintation.util';
+import {  PaginationUtil } from 'src/lib/paginatation.util';
 
 @Injectable()
 export class StudentsService {

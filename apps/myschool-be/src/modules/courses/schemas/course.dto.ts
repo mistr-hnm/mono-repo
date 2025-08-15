@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsString, IsNotEmpty, IsOptional, IsNumber, IsPositive, Min, IsEnum } from 'class-validator';
-import { GetPaginationDto, PaginationDto } from 'src/lib/pagintation.util';
+import { GetPaginationDto, PaginationDto } from '../../../lib/paginatation.util';
+
  export class CreateCourseDto {
     @ApiProperty({ example: 101, description: "The unique ID of the course" })
     @IsNumber()

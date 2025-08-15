@@ -4,7 +4,7 @@ import { UserService } from './user.service';
 import { signture } from 'src/core/meta/global.header';
 import { CreateUserDto, CreateUserResponseDto, DeleteUserResponseDto, GetUserResponseDto, GetUsersResponseDto, LoginUserDto, LoginUserResponseDto, UpdateUserDto, UpdateUserResponseDto } from './schemas/user.dto';
 import { BadRequestResponseDto, InternalServerErrorResponseDto, NotFoundResponseDto, UnauthorizedResponseDto } from 'src/lib/global.response';
-import { PaginationDto } from 'src/lib/pagintation.util';
+import { PaginationDto } from 'src/lib/paginatation.util';
 
 @Controller()
 export class UserController {

@@ -10,7 +10,7 @@ import {
     IsPositive,
     IsEnum, 
 } from 'class-validator';
-import { GetPaginationDto, PaginationDto } from 'src/lib/pagintation.util';
+import { GetPaginationDto, PaginationDto } from 'src/lib/paginatation.util';
  
 class StudentEnrolledCourseResponseDto {
     @ApiProperty({ example: '60c72b2f9b1e8b0015b0e4d7', description: 'The MongoDB ObjectId of the enrolled course' })

@@ -6,7 +6,7 @@
 
   "scripts": {
     "dev" : "nx run-many -t start:dev",
-    "start" : "pnpm -r --aggregate-output run start:dev ",
+    "start" : "pnpm -r --aggregate-output run start:dev",
     "cleanAll" : "nx reset && nx run-many -t clean && rm -rf node_modules && rm -rf apps/*/node_modules"
   },
   "private": true,
