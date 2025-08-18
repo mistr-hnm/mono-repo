@@ -16,4 +16,4 @@ FROM base AS prod-be
 COPY --from=build /prod/api /prod/api
 WORKDIR /prod/api
 EXPOSE 3000
-CMD ["node", "dist/main.js"]
+CMD ["node", "dist/src/main.js"]
