@@ -30,7 +30,7 @@ if (!rootElement.innerHTML) {
           <App/>
           <Toaster />
       </QueryClientProvider>
-    </StrictMode>,
+    </StrictMode>
   )
 }
 
