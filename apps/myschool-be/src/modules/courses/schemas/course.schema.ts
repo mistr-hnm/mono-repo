@@ -5,7 +5,7 @@ import { BaseSchema } from '../../../core/meta/base.schema';
 @Schema({ timestamps : true})
 export class Course extends BaseSchema {
 
-    @Prop()
+    
     _id: Types.ObjectId;
 
     @Prop({ required: true })
