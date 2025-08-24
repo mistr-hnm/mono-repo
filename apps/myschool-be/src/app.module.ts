@@ -27,7 +27,13 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
         if (!uri) {
           throw new Error("Mongo env missing!")
         }
-        return { uri };
+        return {
+           uri,
+           maxPoolSize: 10,
+           serverSelectionTimeoutMS : 5000,
+           socketTimeoutMS : 45000,
+           bufferCommands : false,
+        };
       },
       inject: [ConfigService]
     }),

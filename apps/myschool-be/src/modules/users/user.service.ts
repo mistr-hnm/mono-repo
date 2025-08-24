@@ -26,20 +26,24 @@ export class UserService {
         if (!userData) {
             throw new NotFoundException("User not found. Please register first.")
         } 
-        // const isMatch = await bcrypt.compare(loginUserDto.password, userData.password);    
-        // if (!isMatch) {
-        //     throw new BadRequestException("Password incorrect.")
-        // };
+        const isMatch = await bcrypt.compare(loginUserDto.password, userData.password);    
+        if (!isMatch) {
+            throw new BadRequestException("Password incorrect.")
+        };
         const payload = { sub: userData._id, email: loginUserDto.email }
         const token = await this.jwtService.signAsync(payload)
-        const permission = await this.permissionService.findAll()
-        const isCached =  await this.cacheService.addToCache('permission', JSON.stringify(permission.data));
-        console.log("isCached",isCached);
-         
+        let cachedPermissions = await this.cacheService.getFromCache('permission') as string
+        console.log("cachedPermissions",cachedPermissions);
+        if (!cachedPermissions) {
+            const permission = await this.permissionService.findAll()
+            cachedPermissions = JSON.stringify(permission.data);
+            await this.cacheService.addToCache('permission', JSON.stringify(cachedPermissions));
+        }
+        console.log("done");
         return {
             status: true,
             message: "User logged in successfully.",
-            data: { user: userData._id.toString(), email: loginUserDto.email, token: token, permission: permission.data }
+            data: { user: userData._id.toString(), email: loginUserDto.email, token: token, permission: JSON.parse(cachedPermissions) }
         };
     }
 
