@@ -26,10 +26,10 @@ export class UserService {
         if (!userData) {
             throw new NotFoundException("User not found. Please register first.")
         } 
-        const isMatch = await bcrypt.compare(loginUserDto.password, userData.password);    
-        if (!isMatch) {
-            throw new BadRequestException("Password incorrect.")
-        };
+        // const isMatch = await bcrypt.compare(loginUserDto.password, userData.password);    
+        // if (!isMatch) {
+        //     throw new BadRequestException("Password incorrect.")
+        // };
         const payload = { sub: userData._id, email: loginUserDto.email }
         const token = await this.jwtService.signAsync(payload)
         const permission = await this.permissionService.findAll()
