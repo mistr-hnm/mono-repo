@@ -6,7 +6,7 @@ const apiKey = `${import.meta.env.VITE_API_KEY}`
 
 export const axiosInstance = axios.create({
     baseURL: url,
-    timeout: 0
+    timeout: 5000
 })
 
 axiosInstance.interceptors.request.use(

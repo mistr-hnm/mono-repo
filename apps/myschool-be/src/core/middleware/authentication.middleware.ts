@@ -46,11 +46,12 @@ export class AuthenticationMiddleware implements NestMiddleware {
             }
 
             let cachedPermissions = await this.cacheService.getFromCache('permission') as string
+            console.log("cachedPermissions",cachedPermissions);
             
                         
             if (!cachedPermissions) {
                 const permission = await this.permissionService.findAll()
-                                
+                console.log("if not permission",permission);
                 if(!permission?.data){
                     throw new ForbiddenException("Permission not allowed")
                 }

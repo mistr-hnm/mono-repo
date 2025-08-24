@@ -33,7 +33,8 @@ export class UserService {
         const payload = { sub: userData._id, email: loginUserDto.email }
         const token = await this.jwtService.signAsync(payload)
         const permission = await this.permissionService.findAll()
-        // const isCached =  await this.cacheService.addToCache('permission', JSON.stringify(permission.data));
+        const isCached =  await this.cacheService.addToCache('permission', JSON.stringify(permission.data));
+        console.log("isCached",isCached);
          
         return {
             status: true,

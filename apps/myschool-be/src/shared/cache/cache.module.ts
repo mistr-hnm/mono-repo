@@ -1,7 +1,7 @@
 import { CacheModule } from "@nestjs/cache-manager";
 import { Module } from "@nestjs/common";
 import { CacheService } from "./cache.service";
-import { ConfigModule, ConfigService } from "@nestjs/config";
+import { ConfigService } from "@nestjs/config";
 import { createKeyv, Keyv } from '@keyv/redis';
 import { CacheableMemory } from 'cacheable';
 
@@ -9,6 +9,16 @@ import { CacheableMemory } from 'cacheable';
     imports: [
         CacheModule.registerAsync({
             useFactory: async (configService: ConfigService) => {
+              const redis = createKeyv(configService.get("REDIS_URL"));
+              // ✅ Attach listeners to check connection
+              redis.on("error", (err: any) => {
+                console.error("❌ Redis connection error:", err.message);
+              });
+
+              redis.on("connect", () => {
+                console.log("✅ Redis connected successfully!");
+              });
+
               return {
                 stores: [
                   new Keyv({
