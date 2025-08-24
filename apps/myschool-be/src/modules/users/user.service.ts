@@ -37,7 +37,7 @@ export class UserService {
         if (!cachedPermissions) {
             const permission = await this.permissionService.findAll()
             cachedPermissions = JSON.stringify(permission.data);
-            await this.cacheService.addToCache('permission', JSON.stringify(cachedPermissions));
+            await this.cacheService.addToCache('permission', cachedPermissions);
         }
         console.log("done");
         return {
