@@ -22,24 +22,39 @@ export class UserService {
     ) { }
 
     async login(loginUserDto: LoginUserDto): Promise<LoginUserResponseDto | null> {
-        console.log("loginUserDto",loginUserDto);
+        console.time("login");
+
         
+        console.time("findUser");
         const userData = await this.userModel.findOne({ email: loginUserDto.email }).select(["_id", "password"]);
+        console.time("findUser");
         if (!userData) {
             throw new NotFoundException("User not found. Please register first.")
         }
         console.log("userData",userData);
+        console.time("bcrypt");
+
         const isMatch = await bcrypt.compare(loginUserDto.password, userData.password);
+        console.time("bcrypt");
+
         if (!isMatch) {
             throw new BadRequestException("Password incorrect.")
         };
 
         const payload = { sub: userData._id, email: loginUserDto.email }
-        const token = await this.jwtService.signAsync(payload)
+        console.time("jwt");
 
+        const token = await this.jwtService.signAsync(payload)
+        console.time("jwt");
+        console.time("permissions");
         const permission = await this.permissionService.findAll()
         console.log("permission",permission);
-        await this.cacheService.addToCache('permission', JSON.stringify(permission.data));
+        console.time("cache");
+
+        const isCached =  await this.cacheService.addToCache('permission', JSON.stringify(permission.data));
+        console.time("cache");
+        console.timeEnd("login");
+
         
         return {
             status: true,
