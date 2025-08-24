@@ -6,7 +6,7 @@ const apiKey = `${import.meta.env.VITE_API_KEY}`
 
 export const axiosInstance = axios.create({
     baseURL: url,
-    timeout: 1000
+    timeout: 5000
 })
 
 axiosInstance.interceptors.request.use(
@@ -26,6 +26,7 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
     (response) => response,
     (error) => {
+        console.log("interceptor error",error);
         if (error?.response?.status === 401) {
             toast.error("Authentication failed.")
             localStorage.removeItem("auth");

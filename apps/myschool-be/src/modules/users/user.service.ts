@@ -22,11 +22,13 @@ export class UserService {
     ) { }
 
     async login(loginUserDto: LoginUserDto): Promise<LoginUserResponseDto | null> {
+        console.log("loginUserDto",loginUserDto);
+        
         const userData = await this.userModel.findOne({ email: loginUserDto.email }).select(["_id", "password"]);
         if (!userData) {
             throw new NotFoundException("User not found. Please register first.")
         }
-
+        console.log("userData",userData);
         const isMatch = await bcrypt.compare(loginUserDto.password, userData.password);
         if (!isMatch) {
             throw new BadRequestException("Password incorrect.")
@@ -36,7 +38,7 @@ export class UserService {
         const token = await this.jwtService.signAsync(payload)
 
         const permission = await this.permissionService.findAll()
-        
+        console.log("permission",permission);
         await this.cacheService.addToCache('permission', JSON.stringify(permission.data));
         
         return {
