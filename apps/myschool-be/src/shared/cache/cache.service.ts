@@ -8,15 +8,30 @@ export class CacheService {
 
 
     async addToCache(key: string, value: string, ttl?: number) {
-        return await this.cacheManager.set(key, value ,ttl || (1000 * 60 * 60))
+        try {
+            await this.cacheManager.set(key, value ,ttl || (1000 * 60 * 60))
+        } catch (error) {
+            console.error('Cache get failed:', error);
+            return null; // Graceful degradation
+        }
     }
 
     async getFromCache(key: string) {
-        return await this.cacheManager.get(key)
+        try {
+            return await this.cacheManager.get(key)
+        } catch (error) {
+            console.error('Cache get failed:', error);
+            return null; // Graceful degradation
+        }
     }
 
     async removeFromCache(key: string) {
-        return await this.cacheManager.del(key)
+        try {
+            return await this.cacheManager.del(key)
+        } catch (error) {
+            console.error('Cache get failed:', error);
+            return null; // Graceful degradation
+        }
     }
 
 }
