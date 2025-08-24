@@ -46,7 +46,7 @@ export class AuthenticationMiddleware implements NestMiddleware {
             }
 
             let cachedPermissions = await this.cacheService.getFromCache('permission') as string
-            console.log("cachedPermissions",cachedPermissions);
+            console.log("cachedPermissions in middleware",cachedPermissions);
             
                         
             if (!cachedPermissions) {
