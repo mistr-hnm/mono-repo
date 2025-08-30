@@ -6,6 +6,8 @@ const envSchema = z.object({
     NODE_ENV : z.enum(["development", "production"]),
     DB_URL : z.string(),
     REDIS_URL : z.string(),
+    OTHER_URL : z.string(),
+    SAMPLE_URL : z.string(),
     API_KEY : z.string(),
     SECRET : z.string(),
     S3_BUCKET_NAME : z.string(),

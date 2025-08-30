@@ -12,8 +12,12 @@ import Redis from "ioredis";
             useFactory: async (configService: ConfigService) => {
               const redisUrl = configService.get<string>('REDIS_URL');
               const uri = configService.get<string>('DB_URL');
+              const otherurl = configService.get<string>('OTHER_URL');
+              const sampleurl = configService.get<string>('SAMPLE_URL');
               console.log("redisUrl",redisUrl);
               console.log("db   uri",uri);
+              console.log("otherurl   uri",otherurl);
+              console.log("sampleurl   uri",sampleurl);
 
               if (!redisUrl) {
                 throw new Error("REDIS_URL is not defined in the configuration");
