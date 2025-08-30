@@ -16,6 +16,10 @@ const envSchema = z.object({
     S3_SECRET_ACCESS_KEY : z.string(),
 });
 
+console.log("process.env.DB_URL =", process.env.DB_URL);
+console.log("process.env.REDIS_URL =", process.env.REDIS_URL);
+
+
 export type EnvSchema = z.infer<typeof envSchema>;
 
 const envResult = envSchema.safeParse(process.env);

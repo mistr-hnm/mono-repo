@@ -9,6 +9,7 @@ import Redis from "ioredis";
 @Module({
     imports: [
         CacheModule.registerAsync({
+          
             useFactory: async (configService: ConfigService) => {
               const redisUrl = configService.get<string>('REDIS_URL');
               const uri = configService.get<string>('DB_URL');
