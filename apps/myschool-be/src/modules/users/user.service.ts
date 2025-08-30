@@ -33,13 +33,14 @@ export class UserService {
         const payload = { sub: userData._id, email: loginUserDto.email }
         const token = await this.jwtService.signAsync(payload)
         let cachedPermissions = await this.cacheService.getFromCache('permission') as string
-        console.log("cachedPermissions",cachedPermissions);
+        
         if (!cachedPermissions) {
             const permission = await this.permissionService.findAll()
             cachedPermissions = JSON.stringify(permission.data);
             await this.cacheService.addToCache('permission', cachedPermissions);
+        }else{
+            console.log("cachedPermissions HIT 1",cachedPermissions);
         }
-        console.log("done");
         return {
             status: true,
             message: "User logged in successfully.",

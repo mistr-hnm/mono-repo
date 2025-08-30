@@ -7,7 +7,8 @@
   "scripts": {
     "dev" : "nx run-many -t start:dev",
     "start" : "pnpm -r --aggregate-output run start:dev",
-    "cleanAll" : "nx reset && nx run-many -t clean && rm -rf node_modules && rm -rf apps/*/node_modules"
+    "cleanAll" : "nx reset && nx run-many -t clean && rm -rf node_modules && rm -rf apps/*/node_modules",
+    "clean" : "nx reset && rm -rf apps/*/dist packages/*/dist"
   },
   "private": true,
   "dependencies": {},
