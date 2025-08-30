@@ -5,8 +5,13 @@ const envSchema = z.object({
     HOST : z.string().min(1),
     NODE_ENV : z.enum(["development", "production"]),
     DB_URL : z.string(),
+    REDIS_URL : z.string(),
     API_KEY : z.string(),
-    SECRET : z.string()
+    SECRET : z.string(),
+    S3_BUCKET_NAME : z.string(),
+    S3_REGION : z.string(),
+    S3_ACCESS_KEY : z.string(),
+    S3_SECRET_ACCESS_KEY : z.string(),
 });
 
 export type EnvSchema = z.infer<typeof envSchema>;
