@@ -10,9 +10,14 @@ import Redis from "ioredis";
     imports: [
         CacheModule.registerAsync({
             useFactory: async (configService: ConfigService) => {
-              const redisUrl = configService.get("REDIS_URL");
+              const redisUrl = configService.get<string>('REDIS_URL');
+              const uri = configService.get<string>('DB_URL');
               console.log("redisUrl",redisUrl);
-              
+              console.log("db   uri",uri);
+
+              if (!redisUrl) {
+                throw new Error("REDIS_URL is not defined in the configuration");
+              }
               const rawRedis = new Redis(redisUrl, {
                 tls: { rejectUnauthorized: false } // required sometimes in prod
               });
