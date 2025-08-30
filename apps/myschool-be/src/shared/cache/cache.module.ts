@@ -10,6 +10,7 @@ import { CacheableMemory } from 'cacheable';
         CacheModule.registerAsync({
             useFactory: async (configService: ConfigService) => {
               const redis = createKeyv(configService.get("REDIS_URL"));
+              
               // ✅ Attach listeners to check connection
               redis.on("error", (err: any) => {
                 console.error("❌ Redis connection error:", err.message);
@@ -24,7 +25,7 @@ import { CacheableMemory } from 'cacheable';
                   new Keyv({
                     store: new CacheableMemory({ ttl: 60000, lruSize: 5000 }),
                   }),
-                  createKeyv(configService.get('REDIS_URL')),
+                  redis,
                 ],
               };
             },

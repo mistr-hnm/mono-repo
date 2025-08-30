@@ -9,7 +9,7 @@ import { PermissionService } from '../permission/permission.service';
 import { CacheService } from '../../shared/cache/cache.service';
 import { CreateUserDto, CreateUserResponseDto, DeleteUserResponseDto, GetUserResponseDto, GetUsersResponseDto, LoginUserDto, LoginUserResponseDto, UpdateUserDto, UpdateUserResponseDto } from './schemas/user.dto';
 import { PaginationDto, PaginationUtil } from 'src/lib/paginatation.util';
-
+import KeyvRedis from '@keyv/redis';
 @Injectable()
 export class UserService {
 
@@ -22,6 +22,12 @@ export class UserService {
     ) { }
 
     async login(loginUserDto: LoginUserDto): Promise<LoginUserResponseDto | null> {
+
+        
+        const store = new KeyvRedis(process.env.REDIS_URL!);
+        store.set('test', '123').then(() => console.log('SET done'));
+        store.get('test').then(v => console.log('GET', v));
+
         const userData = await this.userModel.findOne({ email: loginUserDto.email }).select(["_id", "password"]);
         if (!userData) {
             throw new NotFoundException("User not found. Please register first.")
