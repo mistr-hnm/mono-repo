@@ -22,12 +22,7 @@ export class UserService {
     ) { }
 
     async login(loginUserDto: LoginUserDto): Promise<LoginUserResponseDto | null> {
-
-        
-        const store = new KeyvRedis(process.env.REDIS_URL!);
-        store.set('test', '123').then(() => console.log('SET done'));
-        store.get('test').then(v => console.log('GET', v));
-
+ 
         const userData = await this.userModel.findOne({ email: loginUserDto.email }).select(["_id", "password"]);
         if (!userData) {
             throw new NotFoundException("User not found. Please register first.")
@@ -44,7 +39,7 @@ export class UserService {
             const permission = await this.permissionService.findAll()
             cachedPermissions = JSON.stringify(permission.data);
             await this.cacheService.addToCache('permission', cachedPermissions);
-        }else{
+        } else {
             console.log("cachedPermissions HIT 1",cachedPermissions);
         }
         return {
