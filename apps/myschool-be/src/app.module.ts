@@ -20,7 +20,10 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 @Module({
   imports: [
     RouterModule.register(routes), 
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({ 
+      isGlobal: true,
+      envFilePath: '.env'
+    }),
     MongooseModule.forRootAsync({
       useFactory: (configService: ConfigService) => {
         const uri = configService.get<string>('DB_URL');
