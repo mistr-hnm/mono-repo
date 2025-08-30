@@ -11,6 +11,7 @@ import Redis from "ioredis";
         CacheModule.registerAsync({
             useFactory: async (configService: ConfigService) => {
               const redisUrl = configService.get("REDIS_URL");
+              console.log("redisUrl",redisUrl);
               
               const rawRedis = new Redis(redisUrl, {
                 tls: { rejectUnauthorized: false } // required sometimes in prod
