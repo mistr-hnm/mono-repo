@@ -2,7 +2,7 @@ services:
   myschool-be:
     image: ghcr.io/mistr-hnm/myschool-be:latest
     env_file:
-      - /home/ubuntu/apps/myschool-be/.env
+      - ./apps/myschool-be/.env
     ports:
       - "3000:3000"
   myschool-fe:
